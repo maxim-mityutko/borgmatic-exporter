@@ -17,7 +17,7 @@ def config_opt(func):
     return click.option(
         "-c",
         "--config",
-        default="/etc/borgmatic/config.yaml",
+        default=["/etc/borgmatic.d/config.yaml"],
         help="The path to the borgmatic config file",
         multiple=True,
         type=click.Path(
@@ -70,21 +70,21 @@ def run(config, port, time_borgmatic):
 )
 def enable_systemd(user, config, out):
     systemd_template = f"""
-[Unit]
-Description=Borg Prometheus exporter
-After=network.target
-StartLimitIntervalSec=0
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=1
-User={user}
-ExecStart={sys.executable} run --config {config}
-
-[Install]
-WantedBy=multi-user.target
-"""
+        [Unit]
+        Description=Borg Prometheus exporter
+        After=network.target
+        StartLimitIntervalSec=0
+        
+        [Service]
+        Type=simple
+        Restart=always
+        RestartSec=1
+        User={user}
+        ExecStart={sys.executable} run --config {config}
+        
+        [Install]
+        WantedBy=multi-user.target
+    """
     systemd_template = "\n".join(systemd_template.split("\n")[1:-1])
     out.write(systemd_template)
     out.close()

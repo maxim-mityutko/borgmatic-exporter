@@ -29,9 +29,10 @@ def create_metrics(registry):
     return registry
 
 
-def collect(borgmatic_config, registry):
-    list_infos = run_borgmatic_cmd(f"borgmatic list -c {borgmatic_config} --json")
-    repo_infos = run_borgmatic_cmd(f"borgmatic info -c {borgmatic_config} --json")
+def collect(borgmatic_configs: list, registry):
+    borgmatic_configs = " ".join(borgmatic_configs)
+    list_infos = run_borgmatic_cmd(f"borgmatic list -c {borgmatic_configs} --json")
+    repo_infos = run_borgmatic_cmd(f"borgmatic info -c {borgmatic_configs} --json")
 
     for i in range(len(list_infos)):
         archives = list_infos[i]["archives"]

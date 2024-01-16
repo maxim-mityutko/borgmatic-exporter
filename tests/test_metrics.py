@@ -8,7 +8,7 @@ import requests
 import yaml
 from prometheus_client import CollectorRegistry
 
-from .http_server import start_http_server
+from src.http_server import start_http_server
 
 http = requests.Session()
 assert_status_hook = lambda response, *args, **kwargs: response.raise_for_status()
