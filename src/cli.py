@@ -17,7 +17,7 @@ def config_opt(func):
     return click.option(
         "-c",
         "--config",
-        default=["/etc/borgmatic.d/config.yaml"],
+        default=["/etc/borgmatic.d/config.yml"],
         help="The path to the borgmatic config file",
         multiple=True,
         type=click.Path(
@@ -66,7 +66,7 @@ def run(config, port, time_borgmatic):
     "-o",
     "--out",
     type=click.File(mode="w"),
-    default="/etc/systemd/system/borg-exporter.service",
+    default="/etc/systemd/system/borgmatic-exporter.service",
 )
 def enable_systemd(user, config, out):
     systemd_template = f"""
