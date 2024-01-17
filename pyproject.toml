@@ -35,7 +35,6 @@ requests = "^2.25.1"
 pytest-cov = "^2.11.1"
 ptpython = "^3.0.13"
 pytest-mock = "^3.5.1"
-pyinstaller = "^6.3.0"
 staticx = "^0.12.1"
 PyYAML = "^6.0.1"
 
