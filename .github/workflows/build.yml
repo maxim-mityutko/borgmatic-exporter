@@ -35,9 +35,8 @@ jobs:
 
      - name: Generate coverage report
        run: |
-         ls -hla
          pip install poetry
-         poetry install
+         poetry install --no-root
          coverage run -m pytest
 
   lint:
