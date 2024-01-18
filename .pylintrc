@@ -66,8 +66,7 @@ disable=redefined-outer-name,
         missing-function-docstring,
         use-dict-literal,
         consider-using-enumerate,
-        unnecessary-lambda-assignment,
-        overgeneral-exceptions
+        unnecessary-lambda-assignment
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

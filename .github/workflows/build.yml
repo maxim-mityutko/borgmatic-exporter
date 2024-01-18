@@ -31,7 +31,7 @@ jobs:
         run: |
           pip install poetry
           poetry install --no-root --with dev
-          coverage run -m pytest
+          pytest --cov
 
   lint:
     runs-on: ubuntu-latest
