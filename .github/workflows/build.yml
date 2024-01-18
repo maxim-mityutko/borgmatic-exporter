@@ -35,6 +35,7 @@ jobs:
 
      - name: Generate coverage report
        run: |
+         ls -hla
          pip install poetry
          poetry install
          coverage run -m pytest
@@ -53,13 +54,8 @@ jobs:
         env:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_ALL_CODEBASE: false
           VALIDATE_PYTHON_BLACK: true
           VALIDATE_PYTHON_PYLINT: true
-          VALIDATE_PYTHON_FLAKE8: false
-          VALIDATE_PYTHON_MYPY: false
-          VALIDATE_PYTHON_ISORT: false
-          VALIDATE_MARKDOWN: false
 
   build:
     needs:
