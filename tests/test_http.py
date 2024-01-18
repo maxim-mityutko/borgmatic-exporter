@@ -38,5 +38,6 @@ def test_metrics_endpoint(server, mock_run_command):
     response = http.get("http://localhost:9996/metrics")
     assert "borg_total_backups" in response.text
     assert (
-        'borg_unique_size{repository="/borg/backup-2"} 2.1296544339e+010' in response.text
+        'borg_unique_size{repository="/borg/backup-2"} 2.1296544339e+010'
+        in response.text
     )

@@ -54,7 +54,12 @@ jobs:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
-          VALIDATE_PYTHON: true
+          VALIDATE_PYTHON_BLACK: true
+          VALIDATE_PYTHON_PYLINT: true
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_MYPY: false
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_MARKDOWN: false
 
   build:
     needs:
@@ -76,7 +81,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=tag
-            type=ref,event=pr
+            type=raw,event=pr,value=dev
 
       - name: Inspect Tags
         run: echo "${{ steps.meta.outputs.tags }}"
