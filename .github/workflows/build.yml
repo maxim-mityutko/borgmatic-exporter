@@ -16,28 +16,23 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  checkout:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
   test:
     needs: checkout
     runs-on: ubuntu-latest
     steps:
-     - name: Setup Python
-       uses: actions/setup-python@master
-       with:
-         python-version: 3.11.4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-     - name: Generate coverage report
-       run: |
-         pip install poetry
-         poetry install --no-root
-         coverage run -m pytest
+      - name: Setup Python
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.11.4
+
+      - name: Check Coverage
+        run: |
+          pip install poetry
+          poetry install --no-root
+          coverage run -m pytest
 
   lint:
     needs: checkout
