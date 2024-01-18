@@ -1,40 +1,51 @@
-# borg-exporter [![Build Status](https://ci.depode.com/api/badges/danihodovic/borg-exporter/status.svg)](https://ci.depode.com/danihodovic/borg-exporter)
+# Borgmatic Exporter
 
-![Dashboard](./images/borg_grafana_dashboard.png)
+**Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
+the [borg-exporter](https://github.com/danihodovic/borg-exporter) by [@danihodovic](https://github.com/danihodovic),
+however it introduces a few changes:
 
-A Prometheus exporter for [Borg](https://github.com/borgbackup/borg) backups.
+- extra metrics
+- native integration with the official Borgmatic docker image
 
-It provides the following metrics:
 
-Name     | Description | Type
----------|-------------|----
-borg_backups_total | Total number of Borg backups | Gauge
-borg_last_backup_timestamp | Timestamp of the last backup | Gauge
 
-## Requirements
-
-borg-exporter makes use of **borgmatic** (https://github.com/witten/borgmatic) to fetch the state of backups.
-
-The two mostly used options to install borgmatic
-* From your distro's package manager
-* Statically compiled python binary: https://github.com/danihodovic/borgmatic-binary
-
-Also, the exporter assumes that borgmatic is already configured and enabled.
-
-Refer to the official borgmatic [documentation](https://github.com/borgmatic-collective/borgmatic)
+## Metrics
+| Name                       | Description                              | Type  |
+|----------------------------|------------------------------------------|-------|
+| borg_unique_size           | Uncompressed size of the Borg repository | Gauge |
+| borg_total_size            | Total size of the Borg repository        | Gauge |
+| borg_total_backups         | Total number of Borg backups             | Gauge |
+| borg_last_backup_timestamp | Timestamp of the last Borg backup        | Gauge |
 
 ## Installation
+### Docker
+Recommended way of using **Borgmatic Exporter** is through Docker. The image 
+is based on the official [docker-borgmatic](https://github.com/borgmatic-collective/docker-borgmatic)
+image, and it seamlessly integrates Prometheus metrics into the distribution by running both Borgmatic 
+entrypoint and exporter server in parallel.
 
-Borg exporter runs as a Python binary managed by Systemd. It provides a command
-to bootstrap into a simple systemd service.
+Follow the instructions in the above-mentioned repository to set up Borgmatic. 
 
-To install the binary from Github:
+**Borgmatic Exporter** supports the following environment variables for customization:
+
+| Name                    | Description                                                 | Default                     |
+|-------------------------|-------------------------------------------------------------|-----------------------------|
+| BORGMATIC_CONFIG        | One or multiple references to Borgmatic configuration files | /etc/borgmatic.d/config.yml |
+| BORGMATIC_EXPORTER_PORT | Port for the metrics server                                 | 9996                        |
+| BORGMATIC_EXPORTER_TIME | Display time each Borgmatic call takes                      | false                       |
+
+### Local
+Install and configure [borgmatic](https://github.com/witten/borgmatic) by following the instructions in the 
+official repository, then install **Borgmatic Exporter**
+```shell
+git clone https://github.com/maxim-mityutko/borgmatic-exporter.git
+pip install -Ur requirements.txt
+python3 cli.py run
 ```
-curl -L https://github.com/danihodovic/borg-exporter/releases/download/latest/borg-exporter -o ./borg-exporter
-chmod +x borg-exporter
-sudo mv ./borg-exporter /usr/local/bin/
-sudo borg-exporter enable-systemd
-```
+
+
+# TODO UPDATE ME
+![Dashboard](./images/borg_grafana_dashboard.png)
 
 ## Alerting rules
 
