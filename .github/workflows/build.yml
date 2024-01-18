@@ -30,8 +30,8 @@ jobs:
       - name: Check Coverage
         run: |
           pip install poetry
+          poetry config virtualenvs.create false
           poetry install --no-root --with dev
-          poetry shell
           pytest --version
           pytest --cov
 
