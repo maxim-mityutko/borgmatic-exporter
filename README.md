@@ -1,4 +1,5 @@
 # Borgmatic Exporter
+[![Super-Linter](https://github.com/maxim-mityutko/borgmatic-exporter/actions/workflows/build.yml/badge.svg)](https://github.com/marketplace/actions/super-linter)
 
 **Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
 the [borg-exporter](https://github.com/danihodovic/borg-exporter) by [@danihodovic](https://github.com/danihodovic),
