@@ -66,4 +66,4 @@ def test_collect(registry, mock_run_command):
     last_backup_timestamp = registry.get_sample_value(
         "borg_last_backup_timestamp", labels={"repository": "/borg/backup-1"}
     )
-    assert arrow.get(last_backup_timestamp) == arrow.get("2024-01-09T09:01:54+00:00")
+    assert arrow.get(last_backup_timestamp) == arrow.get(1704790914.0)
