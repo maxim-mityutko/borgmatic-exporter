@@ -17,7 +17,6 @@ env:
 
 jobs:
   test:
-    needs: checkout
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -35,7 +34,6 @@ jobs:
           coverage run -m pytest
 
   lint:
-    needs: checkout
     runs-on: ubuntu-latest
     permissions:
       contents: read
