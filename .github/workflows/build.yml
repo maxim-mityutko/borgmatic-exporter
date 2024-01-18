@@ -30,7 +30,7 @@ jobs:
       - name: Check Coverage
         run: |
           pip install poetry
-          poetry install --no-root --with-dev
+          poetry install --no-root --with dev
           coverage run -m pytest
 
   lint:
