@@ -5,8 +5,10 @@ on:
     tags:
       - 'v*.*.*'
       - 'latest'
+  pull_request:
     branches:
-      - 'feature/*'
+      - 'master'
+      - 'main'
   workflow_dispatch:
 
 env:
@@ -17,14 +19,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-#      - name: Setup QEMU
-#        uses: docker/setup-qemu-action@v3
-#      - name: Setup Docker Buildx
-#        id: buildx
-#        uses: docker/setup-buildx-action@v3
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3.0.0
+        with:
+          platforms: arm64,amd64,arm/v7
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
       - name: Meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5.5.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
       - name: Inspect Tags
