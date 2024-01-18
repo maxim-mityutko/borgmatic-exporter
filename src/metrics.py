@@ -5,7 +5,7 @@ from typing import Any
 
 import arrow
 import timy
-from prometheus_client import Gauge, CollectorRegistry
+from prometheus_client import CollectorRegistry, Gauge
 
 
 def create_metrics(registry):
