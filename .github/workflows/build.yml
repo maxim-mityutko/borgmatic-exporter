@@ -16,7 +16,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  lint:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -33,6 +33,7 @@ jobs:
           VALIDATE_PYTHON: true
           VALIDATE_DOCKERFILE_HADOLINT: false
   build:
+    needs: quality
     runs-on: ubuntu-latest
     steps:
       - name: Setup QEMU
