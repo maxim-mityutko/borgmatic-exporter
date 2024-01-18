@@ -1,4 +1,4 @@
-FROM b3vis/borgmatic:latest
+FROM b3vis/borgmatic:1.8.5
 
 LABEL org.opencontainers.image.source="https://github.com/maxim-mityutko/borgmatic-exporter"
 
@@ -8,7 +8,8 @@ RUN apk add --update --no-cache git supervisor\
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY . exporter
+COPY ./src exporter/src
+COPY ./cli.py export/
 
 # Won't be installing `poetry` into the image to reduce image size, instead `requirements.txt` will be used.
 # Update requirements.txt manually with:

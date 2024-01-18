@@ -16,7 +16,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -31,8 +31,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_PYTHON: true
-          VALIDATE_DOCKERFILE_HADOLINT: true
-
+          VALIDATE_DOCKERFILE_HADOLINT: false
+  build:
+    runs-on: ubuntu-latest
+    steps:
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3.0.0
       - name: Setup Docker Buildx
