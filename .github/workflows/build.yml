@@ -16,14 +16,18 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test:
+  checkout:
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout Code
-       uses: actions/checkout@v4
-       with:
-         fetch-depth: 0
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+  test:
+    needs: checkout
+    runs-on: ubuntu-latest
+    steps:
      - name: Setup Python
        uses: actions/setup-python@master
        with:
@@ -36,6 +40,7 @@ jobs:
          coverage run -m pytest
 
   lint:
+    needs: checkout
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -50,7 +55,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_PYTHON: true
-          VALIDATE_DOCKERFILE_HADOLINT: false
 
   build:
     needs:
