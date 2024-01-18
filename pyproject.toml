@@ -41,3 +41,16 @@ PyYAML = "^6.0.1"
 [build-system]
 requires = ["poetry-core>=1.0.0a5"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+source = [
+    "src"
+]
+omit = [
+    ".venv/*",
+    ".virtualenv/*",
+    "tests/"
+]
+
+[tool.coverage.report]
+fail_under = 70

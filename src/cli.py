@@ -1,13 +1,9 @@
-import os
 import subprocess
-import sys
 
 import click
-import pretty_errors  # pylint: disable=unused-import
+from loguru import logger
 from prometheus_client import CollectorRegistry
 from timy.settings import timy_config
-
-from loguru import logger
 
 from src.http_server import start_http_server
 
@@ -28,7 +24,7 @@ def config_opt(func):
             dir_okay=False,
             readable=True,
         ),
-        envvar="BORGMATIC_CONFIG"
+        envvar="BORGMATIC_CONFIG",
     )(func)
 
 
@@ -45,14 +41,14 @@ def cli():
     default=9996,
     show_default=True,
     help="The port the exporter will listen on",
-    envvar="BORGMATIC_EXPORTER_PORT"
+    envvar="BORGMATIC_EXPORTER_PORT",
 )
 @click.option(
     "--time-borgmatic/--no-time-borgmatic",
     default=False,
     show_default=True,
     help="Show the time each Borgmatic call takes",
-    envvar="BORGMATIC_EXPORTER_TIME"
+    envvar="BORGMATIC_EXPORTER_TIME",
 )
 def run(config, port, time_borgmatic):
     logger.info("Exporter execution parameters set...")

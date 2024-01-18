@@ -3,7 +3,7 @@ from loguru import logger
 from prometheus_client.exposition import choose_encoder
 from waitress import serve
 
-from .metrics import collect, create_metrics
+from src.metrics import collect, create_metrics
 
 blueprint = Blueprint("borg_exporter", __name__)
 
@@ -11,19 +11,19 @@ blueprint = Blueprint("borg_exporter", __name__)
 @blueprint.route("/")
 def index():
     return """
-<!doctype html>
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <title>borgmatic-exporter</title>
-  </head>
-  <body>
-    <h1>Borg Exporter</h1>
-    <p><a href="/metrics">Metrics</a></p>
-  </body>
-</html>
-"""
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <!-- Required meta tags -->
+            <meta charset="utf-8">
+            <title>borgmatic-exporter</title>
+          </head>
+          <body>
+            <h1>Borgmatic Exporter</h1>
+            <p><a href="/metrics">Metrics</a></p>
+          </body>
+        </html>
+    """
 
 
 @blueprint.route("/metrics")
