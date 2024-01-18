@@ -29,6 +29,9 @@ jobs:
         env:
           DEFAULT_BRANCH: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_PYTHON: true
+          VALIDATE_DOCKERFILE_HADOLINT: true
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3.0.0
