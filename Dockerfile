@@ -9,7 +9,8 @@ RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY ./src exporter/src
-COPY ./cli.py export/
+COPY ./cli.py exporter/
+COPY ./requirements.txt exporter/
 
 # Won't be installing `poetry` into the image to reduce image size, instead `requirements.txt` will be used.
 # Update requirements.txt manually with:
