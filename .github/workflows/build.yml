@@ -46,6 +46,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      # https://github.com/marketplace/actions/super-linter
       - name: Super-Linter
         uses: super-linter/super-linter@v5.7.2
         env:
@@ -60,6 +61,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     steps:
+      # https://github.com/marketplace/actions/docker-setup-qemu
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3.0.0
 
@@ -67,6 +69,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3.0.0
 
+      # https://github.com/marketplace/actions/docker-metadata-action
       - name: Meta
         id: meta
         uses: docker/metadata-action@v5.5.0
@@ -89,10 +92,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Build and push Docker images
-#        uses: docker/build-push-action@v5.1.0
-#        with:
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}
-#          push: false
-#          platforms: linux/amd64, linux/arm64, linux/arm/v7
+      # https://github.com/marketplace/actions/build-and-push-docker-images
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5.1.0
+        with:
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          platforms: linux/amd64, linux/arm64, linux/arm/v7
