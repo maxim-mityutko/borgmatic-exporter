@@ -78,7 +78,7 @@ jobs:
           tags: |
             type=ref,event=tag
             type=raw,event=pr,value=dev
-          labels: |
+          annotations: |
             org.opencontainers.image.base.name=borgmatic:1.8.x
             org.opencontainers.image.title=Borgmatic Exporter
             org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
