@@ -100,3 +100,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           push: true
           platforms: linux/amd64, linux/arm64
+          annotations:
+            "org.opencontainers.image.description": "Official Borgmatic image bundled with the Prometheus exporter"
+            "org.opencontainers.image.title": "Borgmatic Exporter"
+            "org.opencontainers.image.source": "https://github.com/maxim-mityutko/borgmatic-exporter"
