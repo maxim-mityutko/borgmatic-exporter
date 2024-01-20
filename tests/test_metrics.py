@@ -67,7 +67,8 @@ def test_collect(registry, mock_run_command):
     assert total_size == 8446787072.0
 
     total_deduplicated_compressed_size = registry.get_sample_value(
-        "borg_total_deduplicated_compressed_size", labels={"repository": "/borg/backup-1"}
+        "borg_total_deduplicated_compressed_size",
+        labels={"repository": "/borg/backup-1"},
     )
     assert total_deduplicated_compressed_size == 537932015.0
 
