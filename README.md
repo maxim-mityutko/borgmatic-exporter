@@ -12,12 +12,15 @@ however it introduces a few changes:
 - native integration with the official Borgmatic docker image
 
 ## Metrics
-| Name                       | Description                              | Type  |
-|----------------------------|------------------------------------------|-------|
-| borg_unique_size           | Uncompressed size of the Borg repository | Gauge |
-| borg_total_size            | Total size of the Borg repository        | Gauge |
-| borg_total_backups         | Total number of Borg backups             | Gauge |
-| borg_last_backup_timestamp | Timestamp of the last Borg backup        | Gauge |
+| Name                                    | Type  |
+|-----------------------------------------|-------|
+| borg_total_backups                      | Gauge |
+| borg_total_chunks                       | Gauge |
+| borg_total_size                         | Gauge |
+| borg_total_compressed_size              | Gauge |
+| borg_total_deduplicated_size            | Gauge |
+| borg_total_deduplicated_compressed_size | Gauge |
+| borg_last_backup_timestamp              | Gauge |
 
 ## Installation
 ### Docker
