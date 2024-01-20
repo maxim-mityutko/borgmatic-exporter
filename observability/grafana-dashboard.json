@@ -67,7 +67,7 @@
   "description": "Dashboard for Borgmatic and Borgmatic Exporter",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": 1573,
+  "gnetId": 20334,
   "graphTooltip": 0,
   "id": null,
   "links": [
@@ -343,7 +343,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -351,13 +351,20 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
+            "lineStyle": {
+              "dash": [
+                10,
+                10
+              ],
+              "fill": "dash"
+            },
             "lineWidth": 1,
-            "pointSize": 5,
+            "pointSize": 3,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -426,7 +433,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "$datasource"
+        "uid": "${DS_VICTORIAMETRICS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -536,7 +543,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Time Since last Backup"
+                "value": "Time Since Last Backup"
               },
               {
                 "id": "unit",
@@ -603,7 +610,8 @@
       "targets": [
         {
           "datasource": {
-            "uid": "$datasource"
+            "type": "prometheus",
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_total_backups{job=\"borgmatic\"})\n",
@@ -615,7 +623,8 @@
         },
         {
           "datasource": {
-            "uid": "$datasource"
+            "type": "prometheus",
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_last_backup_timestamp{job=\"borgmatic\"}) * 1000\n",
@@ -627,7 +636,8 @@
         },
         {
           "datasource": {
-            "uid": "$datasource"
+            "type": "prometheus",
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "time() - sum by (repository) (borg_last_backup_timestamp{job=\"borgmatic\"})\n",
@@ -667,7 +677,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -675,13 +685,20 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
+            "lineStyle": {
+              "dash": [
+                10,
+                10
+              ],
+              "fill": "dash"
+            },
             "lineWidth": 1,
-            "pointSize": 5,
+            "pointSize": 3,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
-            "spanNulls": false,
+            "showPoints": "always",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -762,7 +779,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "",
+  "refresh": "1h",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
@@ -821,6 +838,6 @@
   "timezone": "browser",
   "title": "Borgmatic Backups",
   "uid": "726afcef-0e70-4a2a-b371-e811e1667327",
-  "version": 2,
+  "version": 3,
   "weekStart": "monday"
 }
