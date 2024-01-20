@@ -543,7 +543,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Time Since Last Backup"
+                "value": "Time Since last Backup"
               },
               {
                 "id": "unit",
@@ -779,7 +779,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "1h",
+  "refresh": "1m",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
@@ -789,15 +789,15 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "VictoriaMetrics",
-          "value": "P4169E866C3094E38"
+          "selected": true,
+          "text": "default",
+          "value": "default"
         },
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
         "multi": false,
-        "name": "datasource",
+        "name": "DS_VICTORIAMETRICS",
         "options": [],
         "query": "prometheus",
         "queryValue": "",
@@ -838,6 +838,6 @@
   "timezone": "browser",
   "title": "Borgmatic Backups",
   "uid": "726afcef-0e70-4a2a-b371-e811e1667327",
-  "version": 3,
+  "version": 1,
   "weekStart": "monday"
 }
