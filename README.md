@@ -1,48 +1,63 @@
-# borg-exporter [![Build Status](https://ci.depode.com/api/badges/danihodovic/borg-exporter/status.svg)](https://ci.depode.com/danihodovic/borg-exporter)
+# Borgmatic Exporter
+![Super-Linter](https://github.com/maxim-mityutko/borgmatic-exporter/actions/workflows/build.yml/badge.svg)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/maxim-mityutko/borgmatic-exporter/master)
+![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v1.8.5-blue)
 
-![Dashboard](./images/borg_grafana_dashboard.png)
 
-A Prometheus exporter for [Borg](https://github.com/borgbackup/borg) backups.
+**Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
+the [borg-exporter](https://github.com/danihodovic/borg-exporter) by [@danihodovic](https://github.com/danihodovic),
+however it introduces a few changes:
 
-It provides the following metrics:
+- extra metrics
+- native integration with the official Borgmatic docker image
 
-Name     | Description | Type
----------|-------------|----
-borg_backups_total | Total number of Borg backups | Gauge
-borg_last_backup_timestamp | Timestamp of the last backup | Gauge
-
-## Requirements
-
-borg-exporter makes use of **borgmatic** (https://github.com/witten/borgmatic) to fetch the state of backups.
-
-The two mostly used options to install borgmatic
-* From your distro's package manager
-* Statically compiled python binary: https://github.com/danihodovic/borgmatic-binary
-
-Also, the exporter assumes that borgmatic is already configured and enabled.
-
-Refer to the official borgmatic [documentation](https://github.com/borgmatic-collective/borgmatic)
+## Metrics
+| Name                       | Description                              | Type  |
+|----------------------------|------------------------------------------|-------|
+| borg_unique_size           | Uncompressed size of the Borg repository | Gauge |
+| borg_total_size            | Total size of the Borg repository        | Gauge |
+| borg_total_backups         | Total number of Borg backups             | Gauge |
+| borg_last_backup_timestamp | Timestamp of the last Borg backup        | Gauge |
 
 ## Installation
+### Docker
+Recommended way of using **Borgmatic Exporter** is through Docker. The image 
+is based on the official [docker-borgmatic](https://github.com/borgmatic-collective/docker-borgmatic)
+image, and it seamlessly integrates Prometheus metrics into the distribution by running both Borgmatic 
+entrypoint and exporter server in parallel. All images are available 
+[here](https://github.com/maxim-mityutko/borgmatic-exporter/pkgs/container/borgmatic-exporter).
 
-Borg exporter runs as a Python binary managed by Systemd. It provides a command
-to bootstrap into a simple systemd service.
-
-To install the binary from Github:
+```shell
+docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
 ```
-curl -L https://github.com/danihodovic/borg-exporter/releases/download/latest/borg-exporter -o ./borg-exporter
-chmod +x borg-exporter
-sudo mv ./borg-exporter /usr/local/bin/
-sudo borg-exporter enable-systemd
+
+1. Configure Borgmatic: https://github.com/borgmatic-collective/docker-borgmatic/blob/master/README.md
+2. Configure Borgmatic Exporter:
+
+    **Borgmatic Exporter** supports the following environment variables for customization:
+
+    | Name                    | Description                                                 | Default                     |
+    |-------------------------|-------------------------------------------------------------|-----------------------------|
+    | BORGMATIC_CONFIG        | One or multiple references to Borgmatic configuration files | /etc/borgmatic.d/config.yml |
+    | BORGMATIC_EXPORTER_PORT | Port for the metrics server                                 | 9996                        |
+    | BORGMATIC_EXPORTER_TIME | Display time each Borgmatic call takes                      | false                       |
+
+### Local
+Install and configure [borgmatic](https://github.com/witten/borgmatic) by following the instructions in the 
+official repository, then install **Borgmatic Exporter**
+```shell
+git clone https://github.com/maxim-mityutko/borgmatic-exporter.git
+pip install -Ur requirements.txt
+python3 cli.py run -c <path-to-your-borgmatic-config-yml>
 ```
 
-## Alerting rules
+## Observability and Monitoring
+### Grafana
+![dashboard.png](observability%2Fdashboard.png)
+Dashboard is available in the [repo](/observability/grafana-dashboard.json) or on 
+[Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/20334).
 
-Alerting rules can be found [here](./borg-mixin/prometheus-alerts.yaml). By
-default Prometheus sends an alert if a backup hasn't been issued in 24h5m.
+### Alerts
+Alerting rules can be found [here](observability%2Fprometheus-alert.yaml). By default alert will
+be triggered if there is no backup for repository within 25 hours.
 
-## Grafana Dashboard
-
-You can find the generated Grafana dashboard [here](./borg-mixin/dashboards_out/dashboard.json) and it can be imported directly into the Grafana UI.
-
-It's also available in [Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/14489).

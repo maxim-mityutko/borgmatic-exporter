@@ -1,17 +1,11 @@
-[tool.black]
-skip_numeric_underscore_normalization = true
-exclude = ".*(venv|virtualenv|migrations|node_modules|s3)"
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-skip = '.virtualenv,.venv'
-
 [tool.poetry]
-name = "borg-exporter"
-version = "0.0.2"
+name = "borgmatic-exporter"
+version = "0.1.0"
 description = ""
-authors = ["Dani Hodovic <dani.hodovic@gmail.com>"]
+authors = [
+    "Maxim Mityutko <m@brhd.io>",
+    "Dani Hodovic <dani.hodovic@gmail.com>"
+]
 
 [tool.poetry.dependencies]
 python = "<3.13,>=3.8"
@@ -30,15 +24,33 @@ pytest = "^7.4.4"
 black = "^23.12.1"
 isort = "^5.13.2"
 jedi = "^0.18.0"
-pudb = "^2020.1"
 requests = "^2.25.1"
 pytest-cov = "^2.11.1"
-ptpython = "^3.0.13"
 pytest-mock = "^3.5.1"
-pyinstaller = "^6.3.0"
-staticx = "^0.12.1"
-PyYAML = "^5.4.1"
+
 
 [build-system]
-requires = ["poetry-core>=1.0.0a5"]
+requires = ["poetry-core>=1.8.1"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+source = [
+    "src"
+]
+omit = [
+    ".venv/*",
+    ".virtualenv/*",
+    "tests/"
+]
+
+[tool.coverage.report]
+fail_under = 70
+
+[tool.black]
+skip_numeric_underscore_normalization = true
+exclude = ".*(venv|virtualenv|migrations|node_modules|s3)"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+skip = '.virtualenv,.venv'

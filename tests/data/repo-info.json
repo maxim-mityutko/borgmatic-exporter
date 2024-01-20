@@ -1,0 +1,191 @@
+[
+  {
+    "archives": [
+      {
+        "chunker_params": [
+          "buzhash",
+          19,
+          23,
+          21,
+          4095
+        ],
+        "command_line": [
+          "/usr/local/bin/borg",
+          "create",
+          "--one-file-system",
+          "--read-special",
+          "/borg/1d76edd9::backup-1-{now}",
+          "/etc/borgmatic.d/foo.yml",
+          "/root/.borgmatic"
+        ],
+        "comment": "",
+        "duration": 136.541604,
+        "end": "2024-01-08T21:14:56.000000",
+        "hostname": "borgmatic-54d98478f9-twdbg",
+        "id": "9aa75aeed2f44e65f3821b4da9bbf0617f875dfc5c6b076342876273e098967e",
+        "limits": {
+          "max_archive_size": 2.9277858752832836e-05
+        },
+        "name": "k8s-db-2024-01-08T21:12:39",
+        "start": "2024-01-08T21:12:40.000000",
+        "stats": {
+          "compressed_size": 377726017,
+          "deduplicated_size": 11469767,
+          "nfiles": 10,
+          "original_size": 804895490
+        },
+        "username": "root"
+      },
+      {
+        "chunker_params": [
+          "buzhash",
+          19,
+          23,
+          21,
+          4095
+        ],
+        "command_line": [
+          "/usr/local/bin/borg",
+          "create",
+          "--one-file-system",
+          "--read-special",
+          "--stats",
+          "/borg/1d76edd9::backup-1-{now}",
+          "/etc/borgmatic.d/foo.yml",
+          "/root/.borgmatic"
+        ],
+        "comment": "",
+        "duration": 107.499993,
+        "end": "2024-01-09T04:01:54.000000",
+        "hostname": "borgmatic-54d98478f9-twdbg",
+        "id": "fd21c1301bb6b1989ed1fd4502e93edc6c210c5b4e7d9aff34e10ea2b1c658c2",
+        "limits": {
+          "max_archive_size": 2.965932922518245e-05
+        },
+        "name": "k8s-db-2024-01-09T04:00:05",
+        "start": "2024-01-09T04:00:06.000000",
+        "stats": {
+          "compressed_size": 379050627,
+          "deduplicated_size": 10351331,
+          "nfiles": 11,
+          "original_size": 807712494
+        },
+        "username": "root"
+      }
+    ],
+    "cache": {
+      "path": "/root/.cache/borg/884577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a60",
+      "stats": {
+        "total_chunks": 3505,
+        "total_csize": 3965903861,
+        "total_size": 8446787072,
+        "total_unique_chunks": 565,
+        "unique_csize": 537932015,
+        "unique_size": 1296544339
+      }
+    },
+    "encryption": {
+      "mode": "repokey-blake2"
+    },
+    "repository": {
+      "id": "884577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a60",
+      "last_modified": "2024-01-17T04:02:05.000000",
+      "location": "/borg/backup-1"
+    }
+  },
+  {
+    "archives": [
+      {
+        "chunker_params": [
+          "buzhash",
+          19,
+          23,
+          21,
+          4095
+        ],
+        "command_line": [
+          "/usr/local/bin/borg",
+          "create",
+          "--one-file-system",
+          "--read-special",
+          "--stats",
+          "/borg/1d76edd9::backup-2-{now}",
+          "/etc/borgmatic.d/bar.yml",
+          "/root/.borgmatic"
+        ],
+        "comment": "",
+        "duration": 114.003346,
+        "end": "2024-01-16T04:02:02.000000",
+        "hostname": "borgmatic-54d98478f9-47wnk",
+        "id": "7ab5f931879e0d3978db5e8c3434a3aff20c67d1ac2e90b48fa9ed2dbc5576a2",
+        "limits": {
+          "max_archive_size": 3.0088483506575764e-05
+        },
+        "name": "backup-2-2024-01-16T04:00:07",
+        "start": "2024-01-16T04:00:08.000000",
+        "stats": {
+          "compressed_size": 414011339,
+          "deduplicated_size": 10653075,
+          "nfiles": 12,
+          "original_size": 881184771
+        },
+        "username": "root"
+      },
+      {
+        "chunker_params": [
+          "buzhash",
+          19,
+          23,
+          21,
+          4095
+        ],
+        "command_line": [
+          "/usr/local/bin/borg",
+          "create",
+          "--one-file-system",
+          "--read-special",
+          "--stats",
+          "/borg/1d76edd9::backup02-{now}",
+          "/etc/borgmatic.d/bar.yml",
+          "/root/.borgmatic"
+        ],
+        "comment": "",
+        "duration": 117.189547,
+        "end": "2024-01-17T04:02:05.000000",
+        "hostname": "borgmatic-54d98478f9-47wnk",
+        "id": "8b668fc0521f34e630e4fdd5d73306f70b99e39d15b21ac426b2dc20f3fa641f",
+        "limits": {
+          "max_archive_size": 3.0040799697532062e-05
+        },
+        "name": "backup-2-2024-01-17T04:00:06",
+        "start": "2024-01-17T04:00:08.000000",
+        "stats": {
+          "compressed_size": 419966002,
+          "deduplicated_size": 18718565,
+          "nfiles": 12,
+          "original_size": 893501335
+        },
+        "username": "root"
+      }
+    ],
+    "cache": {
+      "path": "/root/.cache/borg/884577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a60",
+      "stats": {
+        "total_chunks": 3505,
+        "total_csize": 3965903861,
+        "total_size": 18446787072,
+        "total_unique_chunks": 565,
+        "unique_csize": 537932015,
+        "unique_size": 21296544339
+      }
+    },
+    "encryption": {
+      "mode": "repokey-blake2"
+    },
+    "repository": {
+      "id": "884577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a61",
+      "last_modified": "2024-01-17T04:02:05.000000",
+      "location": "/borg/backup-2"
+    }
+  }
+]

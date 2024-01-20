@@ -1,9 +1,7 @@
-import os
 import subprocess
-import sys
 
 import click
-import pretty_errors  # pylint: disable=unused-import
+from loguru import logger
 from prometheus_client import CollectorRegistry
 from timy.settings import timy_config
 
@@ -17,7 +15,7 @@ def config_opt(func):
     return click.option(
         "-c",
         "--config",
-        default="/etc/borgmatic/config.yaml",
+        default=["/etc/borgmatic.d/config.yml"],
         help="The path to the borgmatic config file",
         multiple=True,
         type=click.Path(
@@ -26,6 +24,7 @@ def config_opt(func):
             dir_okay=False,
             readable=True,
         ),
+        envvar="BORGMATIC_CONFIG",
     )(func)
 
 
@@ -42,63 +41,22 @@ def cli():
     default=9996,
     show_default=True,
     help="The port the exporter will listen on",
+    envvar="BORGMATIC_EXPORTER_PORT",
 )
 @click.option(
     "--time-borgmatic/--no-time-borgmatic",
     default=False,
     show_default=True,
     help="Show the time each Borgmatic call takes",
+    envvar="BORGMATIC_EXPORTER_TIME",
 )
 def run(config, port, time_borgmatic):
+    logger.info("Exporter execution parameters set...")
+    logger.info(f"  Borgmatic config path: {config}")
+    logger.info(f"  Port:'{port}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
     start_http_server(config, registry, port)
-
-
-@cli.command()
-@click.option(
-    "-u",
-    "--user",
-    default="root",
-)
-@config_opt
-@click.option(
-    "-o",
-    "--out",
-    type=click.File(mode="w"),
-    default="/etc/systemd/system/borg-exporter.service",
-)
-def enable_systemd(user, config, out):
-    systemd_template = f"""
-[Unit]
-Description=Borg Prometheus exporter
-After=network.target
-StartLimitIntervalSec=0
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=1
-User={user}
-ExecStart={sys.executable} run --config {config}
-
-[Install]
-WantedBy=multi-user.target
-"""
-    systemd_template = "\n".join(systemd_template.split("\n")[1:-1])
-    out.write(systemd_template)
-    out.close()
-    click.secho(f"Wrote systemd service file to {out.name}", fg="green", bold=True)
-
-    run_abort("systemctl daemon-reload")
-    service = os.path.basename(out.name)
-
-    run_abort(f"systemctl start {service}")
-    click.secho(f"Started {service}", fg="green", bold=True)
-
-    # run_abort(f"systemctl unmask {service}")
-    run_abort(f"systemctl enable {service}")
-    click.secho(f"Enabled {service}", fg="green", bold=True)
 
 
 def run_abort(cmd):

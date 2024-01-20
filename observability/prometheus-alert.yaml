@@ -1,11 +1,11 @@
 "groups":
-- "name": "borg"
+- "name": "borgmatic"
   "rules":
-  - "alert": "BorgMissingBackup"
+  - "alert": "BorgmaticMissingBackup"
     "annotations":
       "description": "The instance {{ $labels.instance }} has not created a backup of the repo {{ $labels.repo }} in the last {{ $value }} seconds."
       "summary": "Borg missing backup."
-    "expr": "time() - sum by (repo, instance) (borg_last_backup_timestamp{job=\"borg-db\"}) > 86700"
+    "expr": "time() - sum by (repository) (borg_last_backup_timestamp{job=\"borgmatic\"}) > 90000"
     "for": "1m"
     "labels":
       "severity": "warning"
