@@ -1,10 +1,75 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_VICTORIAMETRICS",
+      "label": "VictoriaMetrics",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.1.2"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
   "description": "Dashboard for Borgmatic and Borgmatic Exporter",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": 1573,
   "graphTooltip": 0,
-  "id": 28,
+  "id": null,
   "links": [
     {
       "asDropdown": false,
@@ -24,7 +89,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "${DS_VICTORIAMETRICS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -87,7 +152,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_total_backups{job=\"borgmatic\"})",
@@ -103,7 +168,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "${DS_VICTORIAMETRICS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -167,7 +232,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_total_size{job=\"borgmatic\"})",
@@ -183,7 +248,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "${DS_VICTORIAMETRICS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -247,7 +312,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_unique_size{job=\"borgmatic\"})",
@@ -263,7 +328,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "${DS_VICTORIAMETRICS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -344,7 +409,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_total_backups{job=\"borgmatic\"})",
@@ -587,7 +652,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${datasource}"
+        "uid": "${DS_VICTORIAMETRICS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -668,7 +733,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_total_size{job=\"borgmatic\"})",
@@ -682,7 +747,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${datasource}"
+            "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
           "expr": "sum by (repository) (borg_unique_size{job=\"borgmatic\"})",
@@ -756,6 +821,6 @@
   "timezone": "browser",
   "title": "Borgmatic Backups",
   "uid": "726afcef-0e70-4a2a-b371-e811e1667327",
-  "version": 1,
+  "version": 2,
   "weekStart": "monday"
 }
