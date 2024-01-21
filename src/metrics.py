@@ -10,8 +10,22 @@ from prometheus_client import CollectorRegistry, Gauge
 
 def create_metrics(registry):
     Gauge(
-        "borg_unique_size",
-        "Uncompressed size of the Borg repository",
+        "borg_total_backups",
+        "Total number of Borg backups",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_total_chunks",
+        "Number of chunks in the Borg repository",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_total_compressed_size",
+        "Total compressed size of the Borg repository",
         ["repository"],
         registry=registry,
     )
@@ -24,8 +38,15 @@ def create_metrics(registry):
     )
 
     Gauge(
-        "borg_total_backups",
-        "Total number of Borg backups",
+        "borg_total_deduplicated_compressed_size",
+        "Total size of the deduplicated and compressed Borg repository",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_total_deduplicated_size",
+        "Uncompressed size of the Borg repository",
         ["repository"],
         registry=registry,
     )
@@ -54,12 +75,28 @@ def collect(borgmatic_configs: list, registry):
     for i in range(len(repos)):
         labels = {"repository": repos[i]["repository"]["location"]}
 
-        # Unique Size
+        # Total Backups
         set_metric(
             registry=registry,
-            metric="borg_unique_size",
+            metric="borg_total_backups",
             labels=labels,
-            value=repos[i]["cache"]["stats"]["unique_size"],
+            value=len(repos[i]["archives"]),
+        )
+
+        # Total Chunks
+        set_metric(
+            registry=registry,
+            metric="borg_total_chunks",
+            labels=labels,
+            value=repos[i]["cache"]["stats"]["total_chunks"],
+        )
+
+        # Compressed Size
+        set_metric(
+            registry=registry,
+            metric="borg_total_compressed_size",
+            labels=labels,
+            value=repos[i]["cache"]["stats"]["total_csize"],
         )
 
         # Total Size
@@ -70,12 +107,20 @@ def collect(borgmatic_configs: list, registry):
             value=repos[i]["cache"]["stats"]["total_size"],
         )
 
-        # Total Backups
+        # Total Deduplicated Compressed Size
         set_metric(
             registry=registry,
-            metric="borg_total_backups",
+            metric="borg_total_deduplicated_compressed_size",
             labels=labels,
-            value=len(repos[i]["archives"]),
+            value=repos[i]["cache"]["stats"]["unique_csize"],
+        )
+
+        # Total Deduplicated Size
+        set_metric(
+            registry=registry,
+            metric="borg_total_deduplicated_size",
+            labels=labels,
+            value=repos[i]["cache"]["stats"]["unique_size"],
         )
 
         if len(repos[i]["archives"]) == 0:

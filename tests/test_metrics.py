@@ -31,9 +31,12 @@ def test_run_command():
 
 def test_registry(registry):
     result = metrics.create_metrics(registry=registry)._names_to_collectors
-    assert "borg_unique_size" in result
-    assert "borg_total_size" in result
     assert "borg_total_backups" in result
+    assert "borg_total_chunks" in result
+    assert "borg_total_compressed_size" in result
+    assert "borg_total_size" in result
+    assert "borg_total_deduplicated_compressed_size" in result
+    assert "borg_total_deduplicated_size" in result
     assert "borg_last_backup_timestamp" in result
 
 
@@ -48,20 +51,36 @@ def test_collect(registry, mock_run_command):
     )
     assert total_backups == 2.0
 
-    unique_size_1 = registry.get_sample_value(
-        "borg_unique_size", labels={"repository": "/borg/backup-1"}
+    total_chunks = registry.get_sample_value(
+        "borg_total_chunks", labels={"repository": "/borg/backup-1"}
     )
-    assert unique_size_1 == 1296544339.0
+    assert total_chunks == 3505.0
 
-    unique_size_2 = registry.get_sample_value(
-        "borg_unique_size", labels={"repository": "/borg/backup-2"}
+    total_compressed_size = registry.get_sample_value(
+        "borg_total_compressed_size", labels={"repository": "/borg/backup-1"}
     )
-    assert unique_size_2 == 21296544339.0
+    assert total_compressed_size == 3965903861.0
 
     total_size = registry.get_sample_value(
         "borg_total_size", labels={"repository": "/borg/backup-1"}
     )
     assert total_size == 8446787072.0
+
+    total_deduplicated_compressed_size = registry.get_sample_value(
+        "borg_total_deduplicated_compressed_size",
+        labels={"repository": "/borg/backup-1"},
+    )
+    assert total_deduplicated_compressed_size == 537932015.0
+
+    total_deduplicated_size_1 = registry.get_sample_value(
+        "borg_total_deduplicated_size", labels={"repository": "/borg/backup-1"}
+    )
+    assert total_deduplicated_size_1 == 1296544339.0
+
+    total_deduplicated_size_2 = registry.get_sample_value(
+        "borg_total_deduplicated_size", labels={"repository": "/borg/backup-2"}
+    )
+    assert total_deduplicated_size_2 == 21296544339.0
 
     last_backup_timestamp = registry.get_sample_value(
         "borg_last_backup_timestamp", labels={"repository": "/borg/backup-1"}
