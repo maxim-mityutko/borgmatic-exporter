@@ -64,3 +64,43 @@ Dashboard is available in the [repo](/observability/grafana-dashboard.json) or o
 Alerting rules can be found [here](observability%2Fprometheus-alert.yaml). By default alert will
 be triggered if there is no backup for repository within 25 hours.
 
+## Development
+
+### Local Environment
+
+* Install [Poetry](https://python-poetry.org)
+* Use provided `Makefile` to setup environment: `make dev`
+* Run tests: `make test`
+
+### Docker
+* Build and run
+    ```shell
+    docker build -t borgmatic:tag .
+    docker run --name borgmatic borgmatic:tag
+    ```
+* Rename or remove existing container, if the same name is already in use
+    ```shell
+    docker container ls -a
+    docker container rm container-id
+    ```
+* Exec into the container and create config
+    ```shell
+    docker exec -it borgmatic /bin/sh
+    
+    borgmatic config generate
+    
+    # The default config will have entries for both remote and local repo
+    # Remote repo config should be commented before proceeding
+    vi /etc/borgmatic/config.yaml
+    
+    borgmatic init --encryption repokey
+    ```
+* Misc
+    ```shell
+    # Output repo info in JSON format
+    borgmatic info --json --last 1
+    # Create backup
+    borgmatic create
+    # Run exporter
+    python3 cli.py run --config /etc/borgmatic/config.yaml
+    ```

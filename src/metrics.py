@@ -70,7 +70,7 @@ def set_metric(
 
 def collect(borgmatic_configs: list, registry):
     borgmatic_configs = " ".join(borgmatic_configs)
-    repos = run_command(f"borgmatic info -c {borgmatic_configs} --json")
+    repos = run_command(f"borgmatic info -c {borgmatic_configs} --json --last 1")
 
     for i in range(len(repos)):
         labels = {"repository": repos[i]["repository"]["location"]}
@@ -123,7 +123,7 @@ def collect(borgmatic_configs: list, registry):
             value=repos[i]["cache"]["stats"]["unique_size"],
         )
 
-        if len(repos[i]["archives"]) == 0:
+        if not repos[i].get("archives") or len(repos[i]["archives"]) == 0:
             continue
 
         latest_archive = repos[i]["archives"][-1]
