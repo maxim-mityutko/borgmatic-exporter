@@ -46,6 +46,9 @@ omit = [
 [tool.coverage.report]
 fail_under = 70
 
+[tool.coverage.html]
+directory = ".html"
+
 [tool.black]
 skip_numeric_underscore_normalization = true
 exclude = ".*(venv|virtualenv|migrations|node_modules|s3)"

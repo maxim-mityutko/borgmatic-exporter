@@ -10,79 +10,64 @@ from src import metrics
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
-@pytest.fixture(scope="function")
-def registry():
-    registry = CollectorRegistry(auto_describe=True)
-    yield registry
+class TestMetrics:
+    @pytest.fixture(scope="function")
+    def registry(self):
+        registry = CollectorRegistry(auto_describe=True)
+        yield registry
 
+    @pytest.fixture(scope="function")
+    def collect(self, mocker, registry):
+        with open(f"{PROJECT_ROOT}/data/repo-info.json") as j:
+            ri = json.load(j)
 
-@pytest.fixture(scope="function")
-def mock_run_command(mocker):
-    with open(f"{PROJECT_ROOT}/data/repo-info.json") as j:
-        ri = json.load(j)
+        with open(f"{PROJECT_ROOT}/data/list-info.json") as j:
+            li = json.load(j)
 
-    yield mocker.patch("src.metrics.run_command", return_value=ri)
+        mocker.patch("src.metrics.run_command", side_effect=[ri, li])
 
+        metrics.create_metrics(registry=registry)
+        metrics.collect(
+            borgmatic_configs=["/conf/foo.yaml", "/conf/bar.yaml", "/conf/baz.yaml"],
+            registry=registry,
+        )
+        yield registry
 
-def test_run_command():
-    result = metrics.run_command(command='echo {"foo": "bar"}')
-    assert result == {"foo": "bar"}
+    def test_run_command(self):
+        result = metrics.run_command(command='echo {"foo": "bar"}')
+        assert result == {"foo": "bar"}
 
+    def test_registry(self, registry):
+        result = metrics.create_metrics(registry=registry)._names_to_collectors
+        assert "borg_total_backups" in result
+        assert "borg_total_chunks" in result
+        assert "borg_total_compressed_size" in result
+        assert "borg_total_size" in result
+        assert "borg_total_deduplicated_compressed_size" in result
+        assert "borg_total_deduplicated_size" in result
+        assert "borg_last_backup_timestamp" in result
 
-def test_registry(registry):
-    result = metrics.create_metrics(registry=registry)._names_to_collectors
-    assert "borg_total_backups" in result
-    assert "borg_total_chunks" in result
-    assert "borg_total_compressed_size" in result
-    assert "borg_total_size" in result
-    assert "borg_total_deduplicated_compressed_size" in result
-    assert "borg_total_deduplicated_size" in result
-    assert "borg_last_backup_timestamp" in result
-
-
-def test_collect(registry, mock_run_command):
-    metrics.create_metrics(registry=registry)
-    metrics.collect(
-        borgmatic_configs=["/conf/foo.yaml", "/conf/bar.yaml"], registry=registry
+    @pytest.mark.parametrize(
+        "metric, repo, expect",
+        [
+            ("borg_total_backups", "/borg/backup-1", 2.0),
+            ("borg_total_backups", "/borg/backup-3", 0.0),
+            ("borg_total_chunks", "/borg/backup-1", 3505.0),
+            ("borg_total_compressed_size", "/borg/backup-1", 3965903861.0),
+            ("borg_total_size", "/borg/backup-1", 8446787072.0),
+            ("borg_total_deduplicated_compressed_size", "/borg/backup-1", 537932015.0),
+            ("borg_total_deduplicated_size", "/borg/backup-1", 1296544339.0),
+            ("borg_total_deduplicated_size", "/borg/backup-2", 21296544339.0),
+        ],
     )
+    def test_individual_metrics(self, collect, metric, repo, expect):
+        registry = collect
+        actual = registry.get_sample_value(name=metric, labels={"repository": repo})
+        assert actual == expect
 
-    total_backups = registry.get_sample_value(
-        "borg_total_backups", labels={"repository": "/borg/backup-1"}
-    )
-    assert total_backups == 2.0
-
-    total_chunks = registry.get_sample_value(
-        "borg_total_chunks", labels={"repository": "/borg/backup-1"}
-    )
-    assert total_chunks == 3505.0
-
-    total_compressed_size = registry.get_sample_value(
-        "borg_total_compressed_size", labels={"repository": "/borg/backup-1"}
-    )
-    assert total_compressed_size == 3965903861.0
-
-    total_size = registry.get_sample_value(
-        "borg_total_size", labels={"repository": "/borg/backup-1"}
-    )
-    assert total_size == 8446787072.0
-
-    total_deduplicated_compressed_size = registry.get_sample_value(
-        "borg_total_deduplicated_compressed_size",
-        labels={"repository": "/borg/backup-1"},
-    )
-    assert total_deduplicated_compressed_size == 537932015.0
-
-    total_deduplicated_size_1 = registry.get_sample_value(
-        "borg_total_deduplicated_size", labels={"repository": "/borg/backup-1"}
-    )
-    assert total_deduplicated_size_1 == 1296544339.0
-
-    total_deduplicated_size_2 = registry.get_sample_value(
-        "borg_total_deduplicated_size", labels={"repository": "/borg/backup-2"}
-    )
-    assert total_deduplicated_size_2 == 21296544339.0
-
-    last_backup_timestamp = registry.get_sample_value(
-        "borg_last_backup_timestamp", labels={"repository": "/borg/backup-1"}
-    )
-    assert arrow.get(last_backup_timestamp)
+    def test_timestamp_metrics(self, collect):
+        registry = collect
+        actual = registry.get_sample_value(
+            name="borg_last_backup_timestamp", labels={"repository": "/borg/backup-1"}
+        )
+        assert arrow.get(actual)
