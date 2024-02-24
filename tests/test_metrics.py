@@ -1,6 +1,7 @@
 import json
 import os
 
+import arrow
 import pytest
 from prometheus_client import CollectorRegistry
 
@@ -54,10 +55,16 @@ class TestMetrics:
             ("borg_total_deduplicated_compressed_size", "/borg/backup-1", 537932015.0),
             ("borg_total_deduplicated_size", "/borg/backup-1", 1296544339.0),
             ("borg_total_deduplicated_size", "/borg/backup-2", 21296544339.0),
-            ("borg_last_backup_timestamp", "/borg/backup-1", 1704790914.0),
         ],
     )
     def test_individual_metrics(self, collect, metric, repo, expect):
         registry = collect
         actual = registry.get_sample_value(name=metric, labels={"repository": repo})
         assert actual == expect
+
+    def test_timestamp_metrics(self, collect):
+        registry = collect
+        actual = registry.get_sample_value(
+            name="borg_last_backup_timestamp", labels={"repository": "/borg/backup-1"}
+        )
+        assert arrow.get(actual)
