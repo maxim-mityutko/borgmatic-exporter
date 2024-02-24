@@ -73,17 +73,6 @@
         "username": "root"
       }
     ],
-    "cache": {
-      "path": "/root/.cache/borg/884577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a60",
-      "stats": {
-        "total_chunks": 3505,
-        "total_csize": 3965903861,
-        "total_size": 8446787072,
-        "total_unique_chunks": 565,
-        "unique_csize": 537932015,
-        "unique_size": 1296544339
-      }
-    },
     "encryption": {
       "mode": "repokey-blake2"
     },
@@ -168,17 +157,6 @@
         "username": "root"
       }
     ],
-    "cache": {
-      "path": "/root/.cache/borg/884577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a60",
-      "stats": {
-        "total_chunks": 3505,
-        "total_csize": 3965903861,
-        "total_size": 18446787072,
-        "total_unique_chunks": 565,
-        "unique_csize": 537932015,
-        "unique_size": 21296544339
-      }
-    },
     "encryption": {
       "mode": "repokey-blake2"
     },
@@ -189,17 +167,6 @@
     }
   },
   {
-    "cache": {
-      "path": "/root/.cache/borg/784577c2d43b8206f499526b70497d27fe8aee697fdd75a9e4d41b483de37a62",
-      "stats": {
-        "total_chunks": 0,
-        "total_csize": 0,
-        "total_size": 0,
-        "total_unique_chunks": 0,
-        "unique_csize": 0,
-        "unique_size": 0
-      }
-    },
     "encryption": {
       "mode": "repokey-blake2"
     },
