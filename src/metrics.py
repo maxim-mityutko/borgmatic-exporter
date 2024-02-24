@@ -80,7 +80,7 @@ def collect(borgmatic_configs: list, registry):
             registry=registry,
             metric="borg_total_backups",
             labels=labels,
-            value=len(repos[i]["archives"]),
+            value=len(repos[i].get("archives", [])),
         )
 
         # Total Chunks
