@@ -70,17 +70,20 @@ def set_metric(
 
 def collect(borgmatic_configs: list, registry):
     borgmatic_configs = " ".join(borgmatic_configs)
+    # Overall repo info and last archive only
     repos = run_command(f"borgmatic info -c {borgmatic_configs} --json --last 1")
+    # All archives
+    archives = run_command(f"borgmatic list -c {borgmatic_configs} --json")
 
-    for i in range(len(repos)):
-        labels = {"repository": repos[i]["repository"]["location"]}
+    for r, a in zip(repos, archives):
+        labels = {"repository": r["repository"]["location"]}
 
         # Total Backups
         set_metric(
             registry=registry,
             metric="borg_total_backups",
             labels=labels,
-            value=len(repos[i].get("archives", [])),
+            value=len(a.get("archives", [])),
         )
 
         # Total Chunks
@@ -88,7 +91,7 @@ def collect(borgmatic_configs: list, registry):
             registry=registry,
             metric="borg_total_chunks",
             labels=labels,
-            value=repos[i]["cache"]["stats"]["total_chunks"],
+            value=r["cache"]["stats"]["total_chunks"],
         )
 
         # Compressed Size
@@ -96,7 +99,7 @@ def collect(borgmatic_configs: list, registry):
             registry=registry,
             metric="borg_total_compressed_size",
             labels=labels,
-            value=repos[i]["cache"]["stats"]["total_csize"],
+            value=r["cache"]["stats"]["total_csize"],
         )
 
         # Total Size
@@ -104,7 +107,7 @@ def collect(borgmatic_configs: list, registry):
             registry=registry,
             metric="borg_total_size",
             labels=labels,
-            value=repos[i]["cache"]["stats"]["total_size"],
+            value=r["cache"]["stats"]["total_size"],
         )
 
         # Total Deduplicated Compressed Size
@@ -112,7 +115,7 @@ def collect(borgmatic_configs: list, registry):
             registry=registry,
             metric="borg_total_deduplicated_compressed_size",
             labels=labels,
-            value=repos[i]["cache"]["stats"]["unique_csize"],
+            value=r["cache"]["stats"]["unique_csize"],
         )
 
         # Total Deduplicated Size
@@ -120,20 +123,20 @@ def collect(borgmatic_configs: list, registry):
             registry=registry,
             metric="borg_total_deduplicated_size",
             labels=labels,
-            value=repos[i]["cache"]["stats"]["unique_size"],
+            value=r["cache"]["stats"]["unique_size"],
         )
 
-        if not repos[i].get("archives") or len(repos[i]["archives"]) == 0:
-            continue
-
-        latest_archive = repos[i]["archives"][-1]
-        # Last Backup Timestamp
-        set_metric(
-            registry=registry,
-            metric="borg_last_backup_timestamp",
-            labels=labels,
-            value=arrow.get(latest_archive["end"]).replace(tzinfo="local").timestamp(),
-        )
+        if r.get("archives") and len(r["archives"]) > 0:
+            # Last Backup Timestamp
+            latest_archive = r["archives"][-1]
+            set_metric(
+                registry=registry,
+                metric="borg_last_backup_timestamp",
+                labels=labels,
+                value=arrow.get(latest_archive["end"])
+                .replace(tzinfo="local")
+                .timestamp(),
+            )
 
 
 def run_command(command: str) -> dict:

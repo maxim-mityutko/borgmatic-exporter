@@ -21,7 +21,10 @@ class TestMetrics:
         with open(f"{PROJECT_ROOT}/data/repo-info.json") as j:
             ri = json.load(j)
 
-        mocker.patch("src.metrics.run_command", return_value=ri)
+        with open(f"{PROJECT_ROOT}/data/list-info.json") as j:
+            li = json.load(j)
+
+        mocker.patch("src.metrics.run_command", side_effect=[ri, li])
 
         metrics.create_metrics(registry=registry)
         metrics.collect(
