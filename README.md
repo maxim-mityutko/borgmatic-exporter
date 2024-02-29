@@ -45,6 +45,9 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
     | BORGMATIC_EXPORTER_PORT | Port for the metrics server                                 | 9996                        |
     | BORGMATIC_EXPORTER_TIME | Display time each Borgmatic call takes                      | false                       |
 
+    *NOTE:* Use colon (`:`) if multiple configs should be provided through the environment variable `BORGMATIC_CONFIG`,
+    e.g. `/etc/borgmatic/config_1.yml:/etc/borgmatic/config_2.yml`
+
 ### Local
 Install and configure [borgmatic](https://github.com/witten/borgmatic) by following the instructions in the 
 official repository, then install **Borgmatic Exporter**

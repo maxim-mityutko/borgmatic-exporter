@@ -69,7 +69,7 @@ def set_metric(
 
 
 def collect(borgmatic_configs: list, registry):
-    borgmatic_configs = " ".join(borgmatic_configs)
+    borgmatic_configs = " -c ".join(borgmatic_configs)
     # Overall repo info and last archive only
     repos = run_command(f"borgmatic info -c {borgmatic_configs} --json --last 1")
     # All archives
