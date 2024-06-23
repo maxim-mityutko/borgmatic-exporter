@@ -6,6 +6,10 @@ authors = [
     "Maxim Mityutko <m@brhd.io>",
     "Dani Hodovic <dani.hodovic@gmail.com>"
 ]
+packages = [{include = "src"}]
+
+[tool.poetry.scripts]
+borgmatic-exporter = 'src.cli:cli'
 
 [tool.poetry.dependencies]
 python = "<3.13,>=3.8"
