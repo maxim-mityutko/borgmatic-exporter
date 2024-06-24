@@ -60,6 +60,9 @@ jobs:
       - lint
       - test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       # https://github.com/marketplace/actions/docker-setup-qemu
       - name: Setup QEMU
