@@ -6,16 +6,12 @@ LABEL org.opencontainers.image.title="Borgmatic Exporter"
 LABEL org.opencontainers.image.description="Official Borgmatic image bundled with the Prometheus exporter"
 
 
-RUN apk add --update --no-cache git supervisor\
-    && rm -rf /var/cache/apk/* /.cache
-
-RUN mkdir -p /var/log/supervisor
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 COPY ./src exporter/src
 COPY ./cli.py exporter/
 COPY ./requirements.txt exporter/
-COPY ./supervisord.conf exporter/
+
+# Copy S6-overlay configs
+COPY --chmod=744 --link root/ /
 
 # Won't be installing `poetry` into the image to reduce image size, instead `requirements.txt` will be used.
 # Update requirements.txt manually with:
@@ -28,4 +24,4 @@ WORKDIR /exporter/
 RUN python3 -m pip install --no-cache -Ur requirements.txt
 RUN chmod 755 /exporter/cli.py
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT ["/init"]
