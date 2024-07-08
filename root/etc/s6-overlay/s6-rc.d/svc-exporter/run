@@ -1,2 +1,2 @@
-#!/usr/bin/with-contenv bash
+#!/command/with-contenv sh
 exec python3 /exporter/cli.py run
