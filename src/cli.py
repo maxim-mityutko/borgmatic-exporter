@@ -52,8 +52,8 @@ def cli():
 )
 def run(config, port, time_borgmatic):
     logger.info("Exporter execution parameters set...")
-    logger.info(f"  Borgmatic config path: {config}")
-    logger.info(f"  Port:'{port}'")
+    logger.info(f"Borgmatic config path: {config}")
+    logger.info(f"Port:'{port}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
     start_http_server(config, registry, port)
