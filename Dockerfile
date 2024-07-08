@@ -1,4 +1,4 @@
-FROM b3vis/borgmatic:1.8.13
+FROM ghcr.io/borgmatic-collective/borgmatic:1.8.13
 
 LABEL org.opencontainers.image.source="https://github.com/maxim-mityutko/borgmatic-exporter"
 LABEL org.opencontainers.image.base.name="borgmatic:1.8.13"
