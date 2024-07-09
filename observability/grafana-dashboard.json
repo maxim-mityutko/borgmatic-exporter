@@ -608,7 +608,7 @@
           "useBackend": false
         }
       ],
-      "title": "Panel Title",
+      "title": "Repo Summary",
       "transformations": [
         {
           "id": "merge",
@@ -965,7 +965,7 @@
           "refId": "TimeSinceLastBackupTimestamp"
         }
       ],
-      "title": "Repos",
+      "title": "Last Backup",
       "transformations": [
         {
           "id": "merge",
