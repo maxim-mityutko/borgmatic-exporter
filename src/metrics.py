@@ -1,6 +1,9 @@
 # pylint: disable=protected-access
 import json
+import os
 import subprocess
+from io import StringIO
+from functools import partial
 from typing import Any
 
 import arrow
@@ -69,11 +72,22 @@ def set_metric(
 
 
 def collect(borgmatic_configs: list, registry):
+    # temporary workaround for https://github.com/borgbackup/borg/issues/7255 to be used together with `--bypass-lock`
+    tmp_env = os.environ.copy()
+    tmp_env["HOME"] = "/tmp/borgmatic-exporter-cache"
+    tmp_env["BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK"] = "yes"
+
     borgmatic_configs = " -c ".join(borgmatic_configs)
     # Overall repo info and last archive only
-    repos = run_command(f"borgmatic info -c {borgmatic_configs} --json --last 1")
+    repos = run_command(
+        f"borgmatic -c {borgmatic_configs} --verbosity -1 borg info --bypass-lock --json --last 1",
+        tmp_env,
+    )
     # All archives
-    archives = run_command(f"borgmatic list -c {borgmatic_configs} --json")
+    archives = run_command(
+        f"borgmatic -c {borgmatic_configs} --verbosity -1 borg list --bypass-lock --json",
+        tmp_env,
+    )
 
     for r, a in zip(repos, archives):
         labels = {"repository": r["repository"]["location"]}
@@ -139,15 +153,31 @@ def collect(borgmatic_configs: list, registry):
             )
 
 
-def run_command(command: str) -> dict:
+def json_multi_parse(fileobj, decoder=json.JSONDecoder(), buffersize=2048):
+    """
+    Parses the content of the file object to json and yields every found valid json.
+    Can read valid json which is concatenated together (in combination not valid json).
+    """
+    buffer = ""
+    for chunk in iter(partial(fileobj.read, buffersize), ""):
+        buffer += chunk
+        while buffer:
+            try:
+                result, index = decoder.raw_decode(buffer)
+                yield result
+                buffer = buffer[index:].lstrip()
+            except ValueError:
+                # Not enough data to decode, read more
+                break
+
+
+def run_command(command: str, command_env=os.environ.copy()) -> dict:
     """
     Execute command via the command line and load the output into dictionary.
     """
     with timy.Timer(command):
         result = subprocess.run(
-            command.split(" "),
-            check=True,
-            stdout=subprocess.PIPE,
+            command.split(" "), check=True, stdout=subprocess.PIPE, env=command_env
         )
     output = result.stdout.decode("utf-8").strip()
-    return json.loads(output)
+    return list(json_multi_parse(StringIO(output)))
