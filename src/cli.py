@@ -21,7 +21,7 @@ def config_opt(func):
         type=click.Path(
             exists=True,
             file_okay=True,
-            dir_okay=False,
+            dir_okay=True,
             readable=True,
         ),
         envvar="BORGMATIC_CONFIG",
