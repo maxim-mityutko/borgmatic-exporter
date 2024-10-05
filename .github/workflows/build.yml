@@ -10,7 +10,11 @@ on:
       - 'master'
       - 'main'
   workflow_dispatch:
-
+    inputs:
+      borgmatic-image-version:
+        description: 'Borgmatic base image version'
+        required: true
+        default: 'latest'
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -111,3 +115,4 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           annotations: ${{ steps.meta.outputs.annotations }}
+          build-args: BORGMATIC_IMAGE_VERSION=${{ github.event.inputs.borgmatic-image-version }}
