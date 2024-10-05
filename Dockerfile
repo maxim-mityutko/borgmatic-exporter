@@ -1,7 +1,8 @@
-FROM ghcr.io/borgmatic-collective/borgmatic:1.8.13
+ARG BORGMATIC_IMAGE_VERSION="latest"
+FROM ghcr.io/borgmatic-collective/borgmatic:${BORGMATIC_IMAGE_VERSION}
 
 LABEL org.opencontainers.image.source="https://github.com/maxim-mityutko/borgmatic-exporter"
-LABEL org.opencontainers.image.base.name="borgmatic:1.8.13"
+LABEL org.opencontainers.image.base.name="borgmatic:${BORGMATIC_IMAGE_VERSION}"
 LABEL org.opencontainers.image.title="Borgmatic Exporter"
 LABEL org.opencontainers.image.description="Official Borgmatic image bundled with the Prometheus exporter"
 
