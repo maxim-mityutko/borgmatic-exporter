@@ -34,8 +34,12 @@ class TestMetrics:
         yield registry
 
     def test_run_command(self):
-        result = metrics.run_command(command='echo {"foo": "bar"}')
-        assert result == {"foo": "bar"}
+        result = metrics.run_command(command='echo {"foo": "bar"}{"foo2": "bar2"}')
+        assert result == [{"foo": "bar"}, {"foo2": "bar2"}]
+
+    def test_run_command_ignore_invalid_json(self):
+        result = metrics.run_command(command='echo {"foo": "bar"}{"foo2": ')
+        assert result == [{"foo": "bar"}]
 
     def test_registry(self, registry):
         result = metrics.create_metrics(registry=registry)._names_to_collectors
