@@ -50,6 +50,11 @@ class TestMetrics:
         assert "borg_total_deduplicated_compressed_size" in result
         assert "borg_total_deduplicated_size" in result
         assert "borg_last_backup_timestamp" in result
+        assert "borg_last_backup_duration" in result
+        assert "borg_last_backup_files" in result
+        assert "borg_last_backup_deduplicated_compressed_size" in result
+        assert "borg_last_backup_compressed_size" in result
+        assert "borg_last_backup_size" in result
 
     @pytest.mark.parametrize(
         "metric, repo, expect",
@@ -62,6 +67,24 @@ class TestMetrics:
             ("borg_total_deduplicated_compressed_size", "/borg/backup-1", 537932015.0),
             ("borg_total_deduplicated_size", "/borg/backup-1", 1296544339.0),
             ("borg_total_deduplicated_size", "/borg/backup-2", 21296544339.0),
+            ("borg_last_backup_duration", "/borg/backup-1", 107.499993),
+            ("borg_last_backup_duration", "/borg/backup-2", 117.189547),
+            ("borg_last_backup_files", "/borg/backup-1", 11),
+            ("borg_last_backup_files", "/borg/backup-2", 12),
+            (
+                "borg_last_backup_deduplicated_compressed_size",
+                "/borg/backup-1",
+                10351331,
+            ),
+            (
+                "borg_last_backup_deduplicated_compressed_size",
+                "/borg/backup-2",
+                18718565,
+            ),
+            ("borg_last_backup_compressed_size", "/borg/backup-1", 379050627),
+            ("borg_last_backup_compressed_size", "/borg/backup-2", 419966002),
+            ("borg_last_backup_size", "/borg/backup-1", 807712494),
+            ("borg_last_backup_size", "/borg/backup-2", 893501335),
         ],
     )
     def test_individual_metrics(self, collect, metric, repo, expect):
