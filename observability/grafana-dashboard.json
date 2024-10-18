@@ -69,7 +69,7 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 20334,
   "graphTooltip": 0,
-  "id": 13,
+  "id": 16,
   "links": [
     {
       "asDropdown": false,
@@ -101,6 +101,7 @@
     },
     {
       "datasource": {
+        "name": "${DS_VICTORIAMETRICS}",
         "type": "prometheus",
         "uid": "${DS_VICTORIAMETRICS}"
       },
@@ -182,6 +183,7 @@
     },
     {
       "datasource": {
+        "name": "${DS_VICTORIAMETRICS}",
         "type": "prometheus",
         "uid": "${DS_VICTORIAMETRICS}"
       },
@@ -264,7 +266,7 @@
     },
     {
       "datasource": {
-        "default": false,
+        "name": "${DS_VICTORIAMETRICS}",
         "type": "prometheus",
         "uid": "${DS_VICTORIAMETRICS}"
       },
@@ -681,6 +683,7 @@
     },
     {
       "datasource": {
+        "name": "${DS_VICTORIAMETRICS}",
         "type": "prometheus",
         "uid": "${DS_VICTORIAMETRICS}"
       },
@@ -773,7 +776,7 @@
       "panels": [
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -827,7 +830,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -846,7 +849,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -931,7 +934,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -951,7 +954,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1036,7 +1039,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1056,7 +1059,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1141,7 +1144,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1161,7 +1164,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1222,7 +1225,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1242,7 +1245,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1327,7 +1330,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1347,7 +1350,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1432,7 +1435,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1452,7 +1455,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1537,7 +1540,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1557,7 +1560,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1613,7 +1616,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1633,7 +1636,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1717,7 +1720,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1737,7 +1740,7 @@
         },
         {
           "datasource": {
-            "default": false,
+            "name": "${DS_VICTORIAMETRICS}",
             "type": "prometheus",
             "uid": "${DS_VICTORIAMETRICS}"
           },
@@ -1822,7 +1825,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "P4169E866C3094E38"
+                "uid": "${DS_VICTORIAMETRICS}"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1905,17 +1908,6 @@
         "skipUrlSync": false,
         "sort": 1,
         "type": "query"
-      },
-      {
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_VICTORIAMETRICS}"
-        },
-        "filters": [],
-        "hide": 0,
-        "name": "Filters",
-        "skipUrlSync": false,
-        "type": "adhoc"
       }
     ]
   },
@@ -1949,6 +1941,6 @@
   "timezone": "browser",
   "title": "Borgmatic Backups",
   "uid": "726afcef-0e70-4a2a-b371-e811e1667326",
-  "version": 9,
+  "version": 6,
   "weekStart": "monday"
 }
