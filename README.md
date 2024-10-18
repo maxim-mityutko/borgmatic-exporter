@@ -59,7 +59,10 @@ python3 cli.py run -c <path-to-your-borgmatic-config-yml>
 
 ## Observability and Monitoring
 ### Grafana
-![dashboard.png](observability%2Fdashboard.png)
+* Global view
+![dashboard.png](observability%2Fdashboard-global.png)
+* Repository details view
+![dashboard.png](observability%2Fdashboard-details.png)
 Dashboard is available in the [repo](/observability/grafana-dashboard.json) or on 
 [Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/20334).
 
