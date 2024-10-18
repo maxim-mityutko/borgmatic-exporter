@@ -10,11 +10,7 @@ on:
       - 'master'
       - 'main'
   workflow_dispatch:
-    inputs:
-      borgmatic-image-version:
-        description: 'Borgmatic base image version:'
-        required: true
-        default: 'latest'
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -86,7 +82,7 @@ jobs:
             type=ref,event=tag
             type=raw,event=pr,value=dev
           annotations: |
-            org.opencontainers.image.base.name=borgmatic:${{ github.event.inputs.borgmatic-image-version }}
+            org.opencontainers.image.base.name=borgmatic:1.8.x
             org.opencontainers.image.title=Borgmatic Exporter
             org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
 
@@ -115,4 +111,3 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           annotations: ${{ steps.meta.outputs.annotations }}
-          build-args: BORGMATIC_IMAGE_VERSION=${{ github.event.inputs.borgmatic-image-version }}
