@@ -1,7 +1,7 @@
 # Borgmatic Exporter
 ![Super-Linter](https://github.com/maxim-mityutko/borgmatic-exporter/actions/workflows/build.yml/badge.svg)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/maxim-mityutko/borgmatic-exporter/master)
-![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v1.8.14-blue)
+![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v1.9.9-blue)
 
 
 **Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
