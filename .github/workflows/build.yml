@@ -128,8 +128,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout $GITHUB_REF_NAME
+          git checkout $GITHUB_HEAD_REF
           sed -i "s/Borgmatic%20Image-v[0-9.]*-green/Borgmatic%20Image-v${{ env.BORGMATIC_IMAGE_VERSION }}-green/" README.md
           git add README.md
           git commit -m "Update badge with Borgmatic Image version ${{ env.BORGMATIC_IMAGE_VERSION }}"
-          git push origin $GITHUB_REF_NAME
+          git push origin $GITHUB_HEAD_REF
