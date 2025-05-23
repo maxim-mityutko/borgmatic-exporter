@@ -25,7 +25,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@master
         with:
-          python-version: 3.11.4
+          python-version: 3.13.3
 
       - name: Check Coverage
         run: |
