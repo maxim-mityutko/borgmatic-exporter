@@ -1,7 +1,7 @@
 # Borgmatic Exporter
 ![Super-Linter](https://github.com/maxim-mityutko/borgmatic-exporter/actions/workflows/build.yml/badge.svg)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/maxim-mityutko/borgmatic-exporter/master)
-![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v1.8.13-blue)
+![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v2.0.6-green)
 
 
 **Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
@@ -12,15 +12,20 @@ however it introduces a few changes:
 - native integration with the official Borgmatic docker image
 
 ## Metrics
-| Name                                    | Type  |
-|-----------------------------------------|-------|
-| borg_total_backups                      | Gauge |
-| borg_total_chunks                       | Gauge |
-| borg_total_size                         | Gauge |
-| borg_total_compressed_size              | Gauge |
-| borg_total_deduplicated_size            | Gauge |
-| borg_total_deduplicated_compressed_size | Gauge |
-| borg_last_backup_timestamp              | Gauge |
+| Name                                          | Type  |
+|-----------------------------------------------|-------|
+| borg_total_backups                            | Gauge |
+| borg_total_chunks                             | Gauge |
+| borg_total_size                               | Gauge |
+| borg_total_compressed_size                    | Gauge |
+| borg_total_deduplicated_size                  | Gauge |
+| borg_total_deduplicated_compressed_size       | Gauge |
+| borg_last_backup_timestamp                    | Gauge |
+| borg_last_backup_duration                     | Gauge |
+| borg_last_backup_files                        | Gauge |
+| borg_last_backup_deduplicated_compressed_size | Gauge |
+| borg_last_backup_compressed_size              | Gauge |
+| borg_last_backup_size                         | Gauge |
 
 ## Installation
 ### Docker
@@ -59,7 +64,10 @@ python3 cli.py run -c <path-to-your-borgmatic-config-yml>
 
 ## Observability and Monitoring
 ### Grafana
-![dashboard.png](observability%2Fdashboard.png)
+* Global view
+![dashboard.png](observability%2Fdashboard-global.png)
+* Repository details view
+![dashboard.png](observability%2Fdashboard-details.png)
 Dashboard is available in the [repo](/observability/grafana-dashboard.json) or on 
 [Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/20334).
 

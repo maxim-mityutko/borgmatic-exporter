@@ -2,8 +2,8 @@
 import json
 import os
 import subprocess
-from io import StringIO
 from functools import partial
+from io import StringIO
 from typing import Any
 
 import arrow
@@ -57,6 +57,41 @@ def create_metrics(registry):
     Gauge(
         "borg_last_backup_timestamp",
         "Timestamp of the last Borg backup",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_last_backup_duration",
+        "Duration of the last Borg backup",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_last_backup_files",
+        "Amount of files contained in the last Borg backup",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_last_backup_deduplicated_compressed_size",
+        "Size of the deduplicated and compressed last Borg backup",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_last_backup_compressed_size",
+        "Size of the compressed last Borg backup",
+        ["repository"],
+        registry=registry,
+    )
+
+    Gauge(
+        "borg_last_backup_size",
+        "Size of the last Borg backup",
         ["repository"],
         registry=registry,
     )
@@ -141,8 +176,9 @@ def collect(borgmatic_configs: list, registry):
         )
 
         if r.get("archives") and len(r["archives"]) > 0:
-            # Last Backup Timestamp
             latest_archive = r["archives"][-1]
+
+            # Last Backup Timestamp
             set_metric(
                 registry=registry,
                 metric="borg_last_backup_timestamp",
@@ -150,6 +186,46 @@ def collect(borgmatic_configs: list, registry):
                 value=arrow.get(latest_archive["end"])
                 .replace(tzinfo="local")
                 .timestamp(),
+            )
+
+            # Last Backup Duration
+            set_metric(
+                registry=registry,
+                metric="borg_last_backup_duration",
+                labels=labels,
+                value=latest_archive["duration"],
+            )
+
+            # Last Backup number of files
+            set_metric(
+                registry=registry,
+                metric="borg_last_backup_files",
+                labels=labels,
+                value=latest_archive["stats"]["nfiles"],
+            )
+
+            # Last Backup Deduplicated Compressed Size
+            set_metric(
+                registry=registry,
+                metric="borg_last_backup_deduplicated_compressed_size",
+                labels=labels,
+                value=latest_archive["stats"]["deduplicated_size"],
+            )
+
+            # Last Backup Compressed Size
+            set_metric(
+                registry=registry,
+                metric="borg_last_backup_compressed_size",
+                labels=labels,
+                value=latest_archive["stats"]["compressed_size"],
+            )
+
+            # Last Backup Size
+            set_metric(
+                registry=registry,
+                metric="borg_last_backup_size",
+                labels=labels,
+                value=latest_archive["stats"]["original_size"],
             )
 
 
