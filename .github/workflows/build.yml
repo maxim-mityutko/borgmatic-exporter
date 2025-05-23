@@ -120,6 +120,9 @@ jobs:
           annotations: ${{ steps.meta.outputs.annotations }}
           build-args: BORGMATIC_IMAGE_VERSION=${{ env.BORGMATIC_IMAGE_VERSION }}
 
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Update README Badge
         if: ${{ success() }}
         run: |
