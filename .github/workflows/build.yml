@@ -18,6 +18,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  BORGMATIC_IMAGE_VERSION: ${{ github.event.inputs.borgmatic-image-version || 'latest' }}
 
 jobs:
   test:
@@ -86,7 +87,7 @@ jobs:
             type=ref,event=tag
             type=raw,event=pr,value=dev
           annotations: |
-            org.opencontainers.image.base.name=borgmatic:${{ github.event.inputs.borgmatic-image-version }}
+            org.opencontainers.image.base.name=borgmatic:${{ env.BORGMATIC_IMAGE_VERSION }}
             org.opencontainers.image.title=Borgmatic Exporter
             org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
 
@@ -115,4 +116,4 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           annotations: ${{ steps.meta.outputs.annotations }}
-          build-args: BORGMATIC_IMAGE_VERSION=${{ github.event.inputs.borgmatic-image-version }}
+          build-args: BORGMATIC_IMAGE_VERSION=${{ env.BORGMATIC_IMAGE_VERSION }}
