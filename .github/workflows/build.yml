@@ -17,6 +17,7 @@ on:
         description: 'Borgmatic base image version:'
         required: true
         default: 'latest'
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -68,7 +69,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       # https://github.com/marketplace/actions/docker-setup-qemu
@@ -139,7 +140,7 @@ jobs:
           git checkout $GITHUB_HEAD_REF
           sed -i "s/Borgmatic%20Image-v[0-9.]*-green/Borgmatic%20Image-v${{ env.BORGMATIC_IMAGE_VERSION }}-green/" README.md
           git add README.md
-          git commit -m "Update badge with Borgmatic Image version ${{ env.BORGMATIC_IMAGE_VERSION }}"
+          git diff --cached --quiet || git commit -m "Update badge with Borgmatic Image version ${{ env.BORGMATIC_IMAGE_VERSION }}"
           git push origin $GITHUB_HEAD_REF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
