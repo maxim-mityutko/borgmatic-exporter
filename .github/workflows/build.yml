@@ -9,11 +9,19 @@ on:
     branches:
       - 'master'
       - 'main'
+    paths-ignore:
+      - 'README.md'
   workflow_dispatch:
+    inputs:
+      borgmatic-image-version:
+        description: 'Borgmatic base image version:'
+        required: true
+        default: 'latest'
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  BORGMATIC_IMAGE_VERSION: ${{ github.event.inputs.borgmatic-image-version || 'latest' }}
 
 jobs:
   test:
@@ -61,7 +69,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       # https://github.com/marketplace/actions/docker-setup-qemu
@@ -71,6 +79,20 @@ jobs:
       - name: Setup Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3.0.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Borgmatic Image Version
+        if: ${{ env.BORGMATIC_IMAGE_VERSION == 'latest' }}
+        id: borgmatic-version
+        run: |
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/borgmatic-collective/borgmatic/tags | jq -r '.[].name' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 )
+          echo "BORGMATIC_IMAGE_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
 
       # https://github.com/marketplace/actions/docker-metadata-action
       - name: Meta
@@ -82,7 +104,7 @@ jobs:
             type=ref,event=tag
             type=raw,event=pr,value=dev
           annotations: |
-            org.opencontainers.image.base.name=borgmatic:1.8.x
+            org.opencontainers.image.base.name=borgmatic:${{ env.BORGMATIC_IMAGE_VERSION }}
             org.opencontainers.image.title=Borgmatic Exporter
             org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
 
@@ -95,13 +117,6 @@ jobs:
       - name: Inspect Annotations
         run: echo "${{ steps.meta.outputs.annotations }}"
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: Build and push Docker images
         uses: docker/build-push-action@v5.1.0
@@ -111,3 +126,21 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           annotations: ${{ steps.meta.outputs.annotations }}
+          build-args: BORGMATIC_IMAGE_VERSION=${{ env.BORGMATIC_IMAGE_VERSION }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Update README Badge
+        if: ${{ success() }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          git checkout $GITHUB_HEAD_REF
+          sed -i "s/Borgmatic%20Image-v[0-9.]*-green/Borgmatic%20Image-v${{ env.BORGMATIC_IMAGE_VERSION }}-green/" README.md
+          git add README.md
+          git diff --cached --quiet || git commit -m "Update badge with Borgmatic Image version ${{ env.BORGMATIC_IMAGE_VERSION }}"
+          git push origin $GITHUB_HEAD_REF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
