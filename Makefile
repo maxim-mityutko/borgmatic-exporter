@@ -1,6 +1,7 @@
 dev:
 	@poetry lock --verbose --no-update
 	@poetry install --all-extras --verbose
+	@poetry export -f requirements.txt --output requirements.txt --without dev --without-hashes
 	@poetry show
 
 test:
