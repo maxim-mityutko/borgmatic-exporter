@@ -9,6 +9,8 @@ on:
     branches:
       - 'master'
       - 'main'
+    paths-ignore:
+      - 'README.md'
   workflow_dispatch:
     inputs:
       borgmatic-image-version:
@@ -117,3 +119,13 @@ jobs:
           platforms: linux/amd64, linux/arm64
           annotations: ${{ steps.meta.outputs.annotations }}
           build-args: BORGMATIC_IMAGE_VERSION=${{ env.BORGMATIC_IMAGE_VERSION }}
+
+      - name: Update README Badge
+        if: ${{ success() }}
+        run: |
+          sed -i "s/Borgmatic%20Image-v[0-9.]*-green/Borgmatic%20Image-v${{ env.BORGMATIC_IMAGE_VERSION }}-green/" README.md
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update badge with Borgmatic Image version ${{ env.BORGMATIC_IMAGE_VERSION }}"
+          git push
