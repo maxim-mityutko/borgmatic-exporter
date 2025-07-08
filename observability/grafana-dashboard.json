@@ -1,47 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_VICTORIAMETRICS",
-      "label": "VictoriaMetrics",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__elements": {},
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "11.2.2"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "stat",
-      "name": "Stat",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
-      "version": ""
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -67,24 +24,9 @@
   "description": "Dashboard for Borgmatic and Borgmatic Exporter",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": 20334,
   "graphTooltip": 0,
-  "id": 16,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": false,
-      "tags": [],
-      "targetBlank": false,
-      "title": "Borgmatic Exporter on GitHub",
-      "tooltip": "",
-      "type": "link",
-      "url": "https://github.com/maxim-mityutko/borgmatic-exporter"
-    }
-  ],
-  "liveNow": false,
+  "id": 59,
+  "links": [],
   "panels": [
     {
       "collapsed": false,
@@ -163,7 +105,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -171,7 +113,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "sum by () (borg_total_backups{job=\"borgmatic\"})",
+          "expr": "sum by() (borg_total_backups{instance=~\"$INSTANCE\"})",
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
@@ -246,7 +188,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -254,7 +196,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "sum by () (borg_total_deduplicated_compressed_size{job=\"borgmatic\"})",
+          "expr": "sum by () (borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\"})",
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
@@ -429,7 +371,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.2.2",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -437,7 +379,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "borg_last_backup_timestamp{job=\"borgmatic\"} * 1000",
+          "expr": "borg_last_backup_timestamp{instance=~\"$INSTANCE\"} * 1000",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -452,7 +394,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "borg_last_backup_duration{job=\"borgmatic\"}",
+          "expr": "borg_last_backup_duration{instance=~\"$INSTANCE\"}",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -470,7 +412,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "borg_total_size{job=\"borgmatic\"}",
+          "expr": "borg_total_size{instance=~\"$INSTANCE\"}",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -488,7 +430,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "borg_total_deduplicated_compressed_size{job=\"borgmatic\"}",
+          "expr": "borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\"}",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -505,7 +447,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "now() * 1000",
+          "expr": "time() * 1000",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -577,8 +519,10 @@
                 "operation": "aggregate"
               },
               "Value #NOW": {
-                "aggregations": [],
-                "operation": "groupby"
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
               },
               "Value #RAW_SIZE": {
                 "aggregations": [
@@ -631,9 +575,19 @@
           "id": "calculateField",
           "options": {
             "binary": {
-              "left": "Value #NOW",
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #NOW (lastNotNull)"
+                }
+              },
               "operator": "-",
-              "right": "Value #LAST_BACKUP_TIMESTAMP (max)"
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #LAST_BACKUP_TIMESTAMP (max)"
+                }
+              }
             },
             "mode": "binary",
             "reduce": {
@@ -645,14 +599,15 @@
           "id": "organize",
           "options": {
             "excludeByName": {
-              "Value #NOW": true
+              "Value #NOW": true,
+              "Value #NOW (lastNotNull)": true
             },
             "includeByName": {},
             "indexByName": {
               "Value #DURATION (lastNotNull)": 3,
               "Value #LAST_BACKUP_TIMESTAMP (max)": 5,
-              "Value #NOW": 6,
-              "Value #NOW - Value #LAST_BACKUP_TIMESTAMP (max)": 4,
+              "Value #NOW (lastNotNull)": 6,
+              "Value #NOW (lastNotNull) - Value #LAST_BACKUP_TIMESTAMP (max)": 4,
               "Value #REPO_ACTUAL_SIZE (lastNotNull)": 2,
               "Value #REPO_RAW_SIZE (lastNotNull)": 1,
               "repository": 0
@@ -666,6 +621,7 @@
               "Value #LAST_BACKUP_TIMESTAMP (lastNotNull)": "Backup Timestamp",
               "Value #LAST_BACKUP_TIMESTAMP (max)": "Backup Timestamp",
               "Value #NOW": "",
+              "Value #NOW (lastNotNull) - Value #LAST_BACKUP_TIMESTAMP (max)": "Since Last Backup",
               "Value #NOW - Value #LAST_BACKUP_TIMESTAMP (max)": "Since Last Backup",
               "Value #RAW_SIZE (lastNotNull)": "Raw Size",
               "Value #REPO_ACTUAL_SIZE (lastNotNull)": "Repo Actual Size",
@@ -746,7 +702,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.2.2",
+      "pluginVersion": "11.4.0",
       "targets": [
         {
           "datasource": {
@@ -754,7 +710,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "sum by () (borg_total_size{job=\"borgmatic\"})",
+          "expr": "sum by () (borg_total_size{instance=~\"$INSTANCE\"})",
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
@@ -825,7 +781,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.2",
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -834,7 +790,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "builder",
-              "expr": "sum by(repository) (borg_total_backups{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"})",
+              "expr": "sum by(repository, instance) (borg_total_backups{instance=~\"$INSTANCE\", repository=~\"$REPOSITORY\"})",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -930,6 +886,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -938,7 +895,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_total_size{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_total_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1035,6 +992,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1043,7 +1001,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_total_compressed_size{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_total_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1140,6 +1098,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1148,7 +1107,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_total_deduplicated_compressed_size{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1220,7 +1179,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.2",
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1229,7 +1188,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "now() - max by(repository) (borg_last_backup_timestamp{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"})",
+              "expr": "time() - min by(instance, repository) (borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"})",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1326,6 +1285,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1334,7 +1294,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "builder",
-              "expr": "borg_last_backup_size{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_last_backup_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1431,6 +1391,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1439,7 +1400,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_compressed_size{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_last_backup_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1536,6 +1497,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1544,7 +1506,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_deduplicated_compressed_size{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_last_backup_deduplicated_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1611,7 +1573,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.2.2",
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1620,7 +1582,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "max by(repository) (borg_last_backup_timestamp{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"} * 1000)",
+              "expr": "max by(repository) (borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"} * 1000)",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1716,6 +1678,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1724,7 +1687,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_files{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_last_backup_files{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1821,6 +1784,7 @@
               "sort": "none"
             }
           },
+          "pluginVersion": "11.4.0",
           "targets": [
             {
               "datasource": {
@@ -1829,7 +1793,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_duration{job=\"borgmatic\", repository=\"${REPOSITORY:raw}\"}",
+              "expr": "borg_last_backup_duration{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1845,13 +1809,13 @@
         }
       ],
       "repeat": "REPOSITORY",
-      "repeatDirection": "h",
       "title": "Details: $REPOSITORY",
       "type": "row"
     }
   ],
+  "preload": false,
   "refresh": "30s",
-  "schemaVersion": 39,
+  "schemaVersion": 40,
   "tags": [
     "backup"
   ],
@@ -1859,27 +1823,20 @@
     "list": [
       {
         "current": {
-          "selected": false,
           "text": "default",
           "value": "default"
         },
-        "hide": 0,
         "includeAll": false,
         "label": "Datasource",
-        "multi": false,
         "name": "DS_VICTORIAMETRICS",
         "options": [],
         "query": "prometheus",
-        "queryValue": "",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
-        "allValue": "All",
         "current": {
-          "selected": true,
           "text": [
             "All"
           ],
@@ -1889,10 +1846,38 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "P4169E866C3094E38"
+          "uid": "${DS_VICTORIAMETRICS}"
         },
-        "definition": "label_values({job=\"borgmatic\"},repository)",
-        "hide": 0,
+        "definition": "label_values(borg_total_backups,instance)",
+        "includeAll": true,
+        "label": "Instance",
+        "multi": true,
+        "name": "INSTANCE",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(borg_total_backups,instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      },
+      {
+        "allValue": "All",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_VICTORIAMETRICS}"
+        },
+        "definition": "label_values({instance=~\"$INSTANCE\"},repository)",
         "includeAll": true,
         "label": "Repository",
         "multi": true,
@@ -1900,19 +1885,18 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values({job=\"borgmatic\"},repository)",
+          "query": "label_values({instance=~\"$INSTANCE\"},repository)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
@@ -1925,22 +1909,11 @@
       "1h",
       "2h",
       "1d"
-    ],
-    "time_options": [
-      "5m",
-      "15m",
-      "1h",
-      "6h",
-      "12h",
-      "24h",
-      "2d",
-      "7d",
-      "30d"
     ]
   },
   "timezone": "browser",
   "title": "Borgmatic Backups",
   "uid": "726afcef-0e70-4a2a-b371-e811e1667326",
-  "version": 6,
+  "version": 1,
   "weekStart": "monday"
 }
