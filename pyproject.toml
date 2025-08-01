@@ -13,7 +13,7 @@ borgmatic-exporter = 'src.cli:cli'
 
 [tool.poetry.dependencies]
 python = "<3.14,>=3.13"
-prometheus-client = "<0.21.0,>=0.19.0"
+prometheus-client = ">=0.19.0,<0.23.0"
 click = "^8.1.7"
 pretty-errors = "^1.2.19"
 loguru = "^0.7.3"
@@ -30,8 +30,8 @@ pytest = "^7.4.4"
 black = "^24.3.0"
 isort = "^6.0.1"
 jedi = "^0.19.2"
-requests = "^2.32.2"
 pytest-cov = "^6.2.1"
+requests = "^2.32.4"
 pytest-mock = "^3.5.1"
 
 
