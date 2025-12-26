@@ -44,19 +44,28 @@ def cli():
     envvar="BORGMATIC_EXPORTER_PORT",
 )
 @click.option(
+    "--host",
+    type=str,
+    default="0.0.0.0",
+    show_default=True,
+    help="The host the exporter will listen on",
+    envvar="BORGMATIC_EXPORTER_HOST",
+)
+@click.option(
     "--time-borgmatic/--no-time-borgmatic",
     default=False,
     show_default=True,
     help="Show the time each Borgmatic call takes",
     envvar="BORGMATIC_EXPORTER_TIME",
 )
-def run(config, port, time_borgmatic):
+def run(config, host, port, time_borgmatic):
     logger.info("Exporter execution parameters set...")
     logger.info(f"Borgmatic config path: {config}")
+    logger.info(f"Host:'{host}'")
     logger.info(f"Port:'{port}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
-    start_http_server(config, registry, port)
+    start_http_server(config, registry, host, port)
 
 
 def run_abort(cmd):

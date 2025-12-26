@@ -36,7 +36,7 @@ def metrics():
     return output, 200, {"Content-Type": content_type}
 
 
-def start_http_server(borgmatic_configs, registry, port):
+def start_http_server(borgmatic_configs, registry, host, port):
     if isinstance(borgmatic_configs, str):
         borgmatic_configs = (borgmatic_configs,)
     app = Flask(__name__)
@@ -44,4 +44,4 @@ def start_http_server(borgmatic_configs, registry, port):
     app.config["borgmatic_config"] = borgmatic_configs
     app.register_blueprint(blueprint)
     logger.info("Started borgmatic-exporter at port='{}'", port)
-    serve(app, host="0.0.0.0", port=port, _quiet=True)
+    serve(app, host=host, port=port, _quiet=True)

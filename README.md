@@ -50,6 +50,7 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
     | Name                    | Description                                                 | Default                     |
     |-------------------------|-------------------------------------------------------------|-----------------------------|
     | BORGMATIC_CONFIG        | One or multiple references to Borgmatic configuration files | /etc/borgmatic.d/config.yml |
+    | BORGMATIC_EXPORTER_HOST | Host for the metrics server                                 | 0.0.0.0                     |
     | BORGMATIC_EXPORTER_PORT | Port for the metrics server                                 | 9996                        |
     | BORGMATIC_EXPORTER_TIME | Display time each Borgmatic call takes                      | false                       |
 
