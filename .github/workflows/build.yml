@@ -85,15 +85,15 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.BORGMATIC_CICD_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get Borgmatic Image Version
         if: ${{ env.BORGMATIC_IMAGE_VERSION == 'latest' }}
         id: borgmatic-version
         run: |
-          TEST=$(curl -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions)
+          TEST=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions)
           echo "$TEST" 
-          LATEST_VERSION=$(curl -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions | jq -r '[.[] | .metadata.container.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | unique | sort_by(split(".") | map(tonumber)) | last' )
+          LATEST_VERSION=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions | jq -r '[.[] | .metadata.container.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | unique | sort_by(split(".") | map(tonumber)) | last' )
           echo "BORGMATIC_IMAGE_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
 
       # https://github.com/marketplace/actions/docker-metadata-action
