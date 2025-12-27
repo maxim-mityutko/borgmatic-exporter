@@ -80,12 +80,12 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3.0.0
 
-      - name: Login to Docker Hub
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.BORGMATIC_CICD_TOKEN }}
 
       - name: Get Borgmatic Image Version
         if: ${{ env.BORGMATIC_IMAGE_VERSION == 'latest' }}
