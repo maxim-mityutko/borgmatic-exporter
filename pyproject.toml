@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "borgmatic-exporter"
-version = "0.2.0"
+version = "0.4.1"
 description = ""
 authors = [
     "Maxim Mityutko <m@brhd.io>",
@@ -12,7 +12,7 @@ packages = [{include = "src"}]
 borgmatic-exporter = 'src.cli:cli'
 
 [tool.poetry.dependencies]
-python = "<3.14,>=3.13"
+python = "<3.15.0,>=3.14.0"
 prometheus-client = ">=0.19.0,<0.23.0"
 click = "^8.1.7"
 pretty-errors = "^1.2.19"
@@ -34,6 +34,8 @@ pytest-cov = "^6.2.1"
 requests = "^2.32.4"
 pytest-mock = "^3.5.1"
 
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
 
 [build-system]
 requires = ["poetry-core>=1.8.1"]
