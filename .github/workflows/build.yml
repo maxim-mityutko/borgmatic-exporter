@@ -91,8 +91,6 @@ jobs:
         if: ${{ env.BORGMATIC_IMAGE_VERSION == 'latest' }}
         id: borgmatic-version
         run: |
-          TEST=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions)
-          echo "$TEST" 
           LATEST_VERSION=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions | jq -r '[.[] | .metadata.container.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | unique | sort_by(split(".") | map(tonumber)) | last' )
           echo "BORGMATIC_IMAGE_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
 
