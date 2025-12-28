@@ -7,11 +7,7 @@ from waitress import serve
 from src.metrics import collect, create_metrics
 
 blueprint = Blueprint("borg_exporter", __name__)
-
-cache_config = {
-    "CACHE_TYPE": "SimpleCache",
-}
-cache = Cache(config=cache_config)
+cache = Cache()
 
 
 @blueprint.route("/")
@@ -51,7 +47,17 @@ def start_http_server(borgmatic_configs, registry, host, port, cache_timeout):
     app.config["borgmatic_config"] = borgmatic_configs
     app.register_blueprint(blueprint)
 
-    cache.init_app(app, config={"CACHE_DEFAULT_TIMEOUT": cache_timeout, **cache_config})
+    if cache_timeout == 0:
+        cache.init_app(app, config={"CACHE_TYPE": "NullCache"})
+        logger.info("Exporter cache is disabled...")
+    else:
+        cache.init_app(
+            app,
+            config={
+                "CACHE_DEFAULT_TIMEOUT": cache_timeout,
+                "CACHE_TYPE": "SimpleCache",
+            },
+        )
 
     logger.info("Started borgmatic-exporter at port='{}'", port)
     serve(app, host=host, port=port, _quiet=True)

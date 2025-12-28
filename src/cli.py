@@ -63,7 +63,7 @@ def cli():
     type=int,
     default=600,
     show_default=True,
-    help="Cache the response of the metrics endpoint for the given number of seconds",
+    help="Cache the response of the metrics endpoint for the given number of seconds, set to 0 to disable caching",
     envvar="BORGMATIC_EXPORTER_CACHE_TIMEOUT",
 )
 def run(config, host, port, time_borgmatic, cache_timeout):
