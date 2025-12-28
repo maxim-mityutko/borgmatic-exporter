@@ -54,7 +54,7 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
     | BORGMATIC_EXPORTER_HOST         | Host for the metrics server                                                | 0.0.0.0                     |
     | BORGMATIC_EXPORTER_PORT         | Port for the metrics server                                                | 9996                        |
     | BORGMATIC_EXPORTER_TIME         | Display time each Borgmatic call takes                                     | false                       |
-    |BORGMATIC_EXPORTER_CACHE_TIMEOUT | Cache the response of the metrics endpoint for the given number of seconds | 300                         |
+    |BORGMATIC_EXPORTER_CACHE_TIMEOUT | Cache the response of the metrics endpoint for the given number of seconds | 600                         |
 
 #### Notes
 

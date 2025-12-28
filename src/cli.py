@@ -61,7 +61,7 @@ def cli():
 @click.option(
     "--cache-timeout",
     type=int,
-    default=300,
+    default=600,
     show_default=True,
     help="Cache the response of the metrics endpoint for the given number of seconds",
     envvar="BORGMATIC_EXPORTER_CACHE_TIMEOUT",
