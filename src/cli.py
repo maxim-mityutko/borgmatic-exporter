@@ -58,14 +58,22 @@ def cli():
     help="Show the time each Borgmatic call takes",
     envvar="BORGMATIC_EXPORTER_TIME",
 )
-def run(config, host, port, time_borgmatic):
+@click.option(
+    "--cache-timeout",
+    type=int,
+    default=300,
+    show_default=True,
+    help="Cache the response of the metrics endpoint for the given number of seconds",
+    envvar="BORGMATIC_EXPORTER_CACHE_TIMEOUT",
+)
+def run(config, host, port, time_borgmatic, cache_timeout):
     logger.info("Exporter execution parameters set...")
     logger.info(f"Borgmatic config path: {config}")
     logger.info(f"Host:'{host}'")
     logger.info(f"Port:'{port}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
-    start_http_server(config, registry, host, port)
+    start_http_server(config, registry, host, port, cache_timeout)
 
 
 def run_abort(cmd):
