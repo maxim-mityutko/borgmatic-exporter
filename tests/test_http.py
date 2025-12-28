@@ -25,9 +25,10 @@ def server():
     registry = CollectorRegistry()
     host = "0.0.0.0"
     port = 9996
+    cache_timeout = 300
     Thread(
         target=start_http_server,
-        args=("/conf/foo.yml", registry, host, port),
+        args=("/conf/foo.yml", registry, host, port, cache_timeout),
         daemon=True,
     ).start()
 

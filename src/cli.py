@@ -71,6 +71,7 @@ def run(config, host, port, time_borgmatic, cache_timeout):
     logger.info(f"Borgmatic config path: {config}")
     logger.info(f"Host:'{host}'")
     logger.info(f"Port:'{port}'")
+    logger.info(f"Cache timeout (seconds):'{cache_timeout}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
     start_http_server(config, registry, host, port, cache_timeout)
