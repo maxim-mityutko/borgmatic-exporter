@@ -8,7 +8,9 @@ from src.metrics import collect, create_metrics
 
 blueprint = Blueprint("borg_exporter", __name__)
 
-cache_config = {"CACHE_TYPE": "SimpleCache",}
+cache_config = {
+    "CACHE_TYPE": "SimpleCache",
+}
 cache = Cache(config=cache_config)
 
 
