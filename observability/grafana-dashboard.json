@@ -1247,9 +1247,9 @@
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "instant": false,
+              "instant": true,
               "legendFormat": "{{repository}}",
-              "range": true,
+              "range": false,
               "refId": "A",
               "useBackend": false
             }
