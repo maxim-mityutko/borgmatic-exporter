@@ -848,7 +848,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "builder",
-              "expr": "sum by(repository, instance) (borg_total_backups{instance=~\"$INSTANCE\", repository=~\"$REPOSITORY\"})",
+              "expr": "sum by(repository) (borg_total_backups{instance=~\"$INSTANCE\", repository=~\"$REPOSITORY\"})",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -1243,13 +1243,13 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "time() - min by(instance, repository) (borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"})",
+              "expr": "time() - max by(repository) (borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"})",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "instant": false,
+              "instant": true,
               "legendFormat": "{{repository}}",
-              "range": true,
+              "range": false,
               "refId": "A",
               "useBackend": false
             }
@@ -1947,7 +1947,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
