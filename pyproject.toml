@@ -24,6 +24,7 @@ waitress = "^3.0.2"
 werkzeug = "^3.1.8"
 arrow = "^1.4.0"
 timy = "^0.4.2"
+urllib3 = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^4.0.5"
