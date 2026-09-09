@@ -87,6 +87,10 @@ python3 cli.py run -c <path-to-your-borgmatic-config-yml>
 Dashboard is available in the [repo](/observability/grafana-dashboard.json) or on
 [Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/20334).
 
+The dashboard uses the last sample in the selected time range for backup metrics.
+This keeps values visible when an exporter is temporarily unreachable; the alerting
+rules remain responsible for reporting backups that are genuinely overdue.
+
 ### Alerts
 
 Alerting rules can be found [here](observability%2Fprometheus-alert.yaml). By default alert will
