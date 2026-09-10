@@ -87,8 +87,9 @@ python3 cli.py run -c <path-to-your-borgmatic-config-yml>
 Dashboard is available in the [repo](/observability/grafana-dashboard.json) or on
 [Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/20334).
 
-The dashboard retains the most recent sample for up to one hour for backup metrics,
-then groups samples by repository. This keeps values visible during temporary
+The dashboard retains the most recent sample for backup metrics for a configurable
+duration, which defaults to 12 hours and can be set from 10 seconds to 24 hours.
+It then groups samples by repository. This keeps values visible during temporary
 exporter outages without retaining stale pod or instance series; the alerting rules
 remain responsible for reporting backups that are genuinely overdue.
 
