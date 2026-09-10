@@ -1950,17 +1950,13 @@
           "text": "12h",
           "value": "12h"
         },
+        "description": "How long Grafana keeps the most recent metric value after the exporter stops reporting. This affects dashboard display only, not alerts.",
         "hide": 0,
         "includeAll": false,
-        "label": "Stale data retention",
+        "label": "Stale After",
         "multi": false,
         "name": "STALE_AFTER",
         "options": [
-          {
-            "selected": false,
-            "text": "10s",
-            "value": "10s"
-          },
           {
             "selected": false,
             "text": "1h",
@@ -1980,9 +1976,14 @@
             "selected": false,
             "text": "24h",
             "value": "24h"
+          },
+          {
+            "selected": false,
+            "text": "48h",
+            "value": "48h"
           }
         ],
-        "query": "10s,1h,6h,12h,24h",
+        "query": "1h,6h,12h,24h,48h",
         "skipUrlSync": false,
         "type": "custom"
       }
