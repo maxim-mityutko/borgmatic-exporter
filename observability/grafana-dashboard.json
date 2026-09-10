@@ -171,7 +171,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "sum by() (borg_total_backups{instance=~\"$INSTANCE\"})",
+          "expr": "sum by() (max by(repository) (last_over_time(borg_total_backups{instance=~\"$INSTANCE\"}[$STALE_AFTER])))",
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
@@ -254,7 +254,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "sum by () (borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\"})",
+          "expr": "sum by () (max by(repository) (last_over_time(borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\"}[$STALE_AFTER])))",
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
@@ -437,7 +437,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "borg_last_backup_timestamp{instance=~\"$INSTANCE\"} * 1000",
+          "expr": "max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\"}[$STALE_AFTER])) * 1000",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -452,7 +452,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "borg_last_backup_duration{instance=~\"$INSTANCE\"}",
+          "expr": "max by(repository) (last_over_time(borg_last_backup_duration{instance=~\"$INSTANCE\"}[$STALE_AFTER]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -470,7 +470,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "borg_total_size{instance=~\"$INSTANCE\"}",
+          "expr": "max by(repository) (last_over_time(borg_total_size{instance=~\"$INSTANCE\"}[$STALE_AFTER]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -488,7 +488,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\"}",
+          "expr": "max by(repository) (last_over_time(borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\"}[$STALE_AFTER]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -768,7 +768,7 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "sum by () (borg_total_size{instance=~\"$INSTANCE\"})",
+          "expr": "sum by () (max by(repository) (last_over_time(borg_total_size{instance=~\"$INSTANCE\"}[$STALE_AFTER])))",
           "intervalFactor": 2,
           "range": true,
           "refId": "A",
@@ -848,7 +848,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "builder",
-              "expr": "sum by(repository) (borg_total_backups{instance=~\"$INSTANCE\", repository=~\"$REPOSITORY\"})",
+              "expr": "max by(repository) (last_over_time(borg_total_backups{instance=~\"$INSTANCE\", repository=~\"$REPOSITORY\"}[$STALE_AFTER]))",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -952,7 +952,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_total_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_total_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1057,7 +1057,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_total_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_total_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1162,7 +1162,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_total_deduplicated_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1243,7 +1243,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "time() - max by(repository) (borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"})",
+              "expr": "time() - max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1348,7 +1348,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "builder",
-              "expr": "borg_last_backup_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_last_backup_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1453,7 +1453,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_last_backup_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1558,7 +1558,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_deduplicated_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_last_backup_deduplicated_compressed_size{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1634,7 +1634,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "max by(repository) (borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"} * 1000)",
+              "expr": "max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]) * 1000)",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1738,7 +1738,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_files{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_last_backup_files{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1843,7 +1843,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "borg_last_backup_duration{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}",
+              "expr": "max by(repository) (last_over_time(borg_last_backup_duration{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1943,6 +1943,49 @@
         "regex": "",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "12h",
+          "value": "12h"
+        },
+        "description": "How long Grafana keeps the most recent metric value after the exporter stops reporting. This affects dashboard display only, not alerts.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Stale After",
+        "multi": false,
+        "name": "STALE_AFTER",
+        "options": [
+          {
+            "selected": false,
+            "text": "1h",
+            "value": "1h"
+          },
+          {
+            "selected": false,
+            "text": "6h",
+            "value": "6h"
+          },
+          {
+            "selected": true,
+            "text": "12h",
+            "value": "12h"
+          },
+          {
+            "selected": false,
+            "text": "24h",
+            "value": "24h"
+          },
+          {
+            "selected": false,
+            "text": "48h",
+            "value": "48h"
+          }
+        ],
+        "query": "1h,6h,12h,24h,48h",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },

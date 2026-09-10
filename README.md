@@ -2,7 +2,7 @@
 
 ![Super-Linter](https://github.com/maxim-mityutko/borgmatic-exporter/actions/workflows/build.yml/badge.svg)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/maxim-mityutko/borgmatic-exporter/master)
-![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v2.1.5-green)
+![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v2.1.7-green)
 
 **Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
 the [borg-exporter](https://github.com/danihodovic/borg-exporter) by [@danihodovic](https://github.com/danihodovic),
@@ -86,6 +86,12 @@ python3 cli.py run -c <path-to-your-borgmatic-config-yml>
 ![dashboard.png](observability%2Fdashboard-details.png)
 Dashboard is available in the [repo](/observability/grafana-dashboard.json) or on
 [Grafana's Dashboard Library](https://grafana.com/grafana/dashboards/20334).
+
+The dashboard retains the most recent sample for backup metrics for a configurable
+duration, which defaults to 12 hours and can be set from 1 hour to 48 hours.
+It then groups samples by repository. This keeps values visible during temporary
+exporter outages without retaining stale pod or instance series; the alerting rules
+remain responsible for reporting backups that are genuinely overdue.
 
 ### Alerts
 
