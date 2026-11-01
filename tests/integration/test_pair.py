@@ -92,7 +92,7 @@ def test_multiple_repositories(pair_factory, config_mode):
 
 
 def test_cache_expires(pair_factory):
-    # Leave room for slow ARM emulation to finish creating the second archive.
+    # Allow the second backup to finish before the cached metrics expire.
     cache_timeout = 60
     pair = pair_factory(cache_timeout=cache_timeout)
     pair.initialize()
