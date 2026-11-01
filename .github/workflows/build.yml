@@ -2,7 +2,6 @@ name: Build Image
 
 on:
   push:
-    branches: ['master', 'main']
     tags: ['v*.*.*', 'latest']
   pull_request:
     branches: ['master', 'main']
@@ -15,10 +14,6 @@ on:
         description: 'Borgmatic base image version to build and test'
         required: true
         default: 'latest'
-      publish-image:
-        description: 'Publish the tested image as dev after all checks pass'
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -60,12 +55,40 @@ jobs:
           VALIDATE_PYTHON_PYLINT: true
 
   resolve-base:
+    needs: [test, lint]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     outputs:
       image: ${{ steps.base.outputs.image }}
       repository: ${{ steps.base.outputs.repository }}
+      version: ${{ steps.borgmatic-version.outputs.version }}
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+      annotations: ${{ steps.meta.outputs.annotations }}
     steps:
+      - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+      - name: Get Borgmatic Image Version
+        id: borgmatic-version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$BORGMATIC_IMAGE_VERSION"
+          if [ "$version" = latest ]; then
+            version=$(gh api --paginate --slurp \
+              '/orgs/borgmatic-collective/packages/container/borgmatic/versions?per_page=100' |
+              jq -er '[.[][] | .metadata.container.tags[]? |
+                select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] |
+                unique | sort_by(split(".") | map(tonumber)) |
+                last // error("No numeric Borgmatic image version found")')
+          fi
+          [[ "$version" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,127}$ ]]
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "BORGMATIC_IMAGE_VERSION=$version" >> "$GITHUB_ENV"
       - name: Resolve immutable Borgmatic base
         id: base
         shell: bash
@@ -76,11 +99,45 @@ jobs:
             awk '$1 == "Digest:" && !seen++ { print $2 }')
           [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
           echo "image=$base@$digest" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
           echo "repository=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
           echo "Borgmatic base: $base:$BORGMATIC_IMAGE_VERSION ($digest)" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Meta
+        id: meta
+        uses: docker/metadata-action@v5
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
+        with:
+          images: ${{ steps.base.outputs.repository }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=dev,enable=${{ github.ref_type != 'tag' }}
+          labels: |
+            org.opencontainers.image.base.name=borgmatic:${{ steps.borgmatic-version.outputs.version }}
+            org.opencontainers.image.base.digest=${{ steps.base.outputs.digest }}
+            org.opencontainers.image.title=Borgmatic Exporter
+            org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
+          annotations: |
+            org.opencontainers.image.base.name=borgmatic:${{ steps.borgmatic-version.outputs.version }}
+            org.opencontainers.image.base.digest=${{ steps.base.outputs.digest }}
+            org.opencontainers.image.title=Borgmatic Exporter
+            org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
+      - name: Inspect Tags
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: printf '%s\n' "$IMAGE_TAGS"
+      - name: Inspect Labels
+        env:
+          IMAGE_LABELS: ${{ steps.meta.outputs.labels }}
+        run: printf '%s\n' "$IMAGE_LABELS"
+      - name: Inspect Annotations
+        env:
+          IMAGE_ANNOTATIONS: ${{ steps.meta.outputs.annotations }}
+        run: printf '%s\n' "$IMAGE_ANNOTATIONS"
+
   integration:
-    name: Integration (${{ matrix.arch }})
+    name: Build and integration (${{ matrix.arch }})
     needs: resolve-base
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -108,8 +165,9 @@ jobs:
           provenance: false
           platforms: linux/${{ matrix.arch }}
           tags: borgmatic-exporter:integration-${{ matrix.arch }}
+          labels: ${{ needs.resolve-base.outputs.labels }}
           build-args: |
-            BORGMATIC_IMAGE_VERSION=${{ env.BORGMATIC_IMAGE_VERSION }}
+            BORGMATIC_IMAGE_VERSION=${{ needs.resolve-base.outputs.version }}
             BORGMATIC_IMAGE=${{ needs.resolve-base.outputs.image }}
           cache-from: type=gha,scope=integration-${{ matrix.arch }}
           cache-to: type=gha,scope=integration-${{ matrix.arch }},mode=max
@@ -133,12 +191,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Save tested image for publication
-        if: (github.event_name == 'push' && github.ref_type == 'tag') || (github.event_name == 'workflow_dispatch' && inputs.publish-image)
+        if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         run: |
           docker save borgmatic-exporter:integration-${{ matrix.arch }} \
             --output "${{ runner.temp }}/tested-${{ matrix.arch }}.tar"
       - name: Upload tested image
-        if: (github.event_name == 'push' && github.ref_type == 'tag') || (github.event_name == 'workflow_dispatch' && inputs.publish-image)
+        if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         uses: actions/upload-artifact@v4
         with:
           name: tested-image-${{ matrix.arch }}
@@ -148,7 +206,7 @@ jobs:
 
   publish:
     needs: [test, lint, resolve-base, integration]
-    if: (github.event_name == 'push' && github.ref_type == 'tag') || (github.event_name == 'workflow_dispatch' && inputs.publish-image)
+    if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -169,20 +227,18 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Image tags
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=tag
-            type=raw,value=dev,enable=${{ github.event_name == 'workflow_dispatch' }}
       - name: Publish the tested images without rebuilding
         shell: bash
         env:
-          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+          IMAGE_TAGS: ${{ needs.resolve-base.outputs.tags }}
+          IMAGE_ANNOTATIONS: ${{ needs.resolve-base.outputs.annotations }}
         run: |
           set -euo pipefail
+          annotations=()
+          while IFS= read -r annotation; do
+            [ -n "$annotation" ] || continue
+            annotations+=(--annotation "$annotation")
+          done <<< "$IMAGE_ANNOTATIONS"
           sources=()
           for arch in amd64 arm64; do
             docker load --input "tested-images/tested-$arch.tar"
@@ -193,5 +249,51 @@ jobs:
           done
           while IFS= read -r tag; do
             [ -n "$tag" ] || continue
-            docker buildx imagetools create --tag "$tag" "${sources[@]}"
+            docker buildx imagetools create --tag "$tag" "${annotations[@]}" "${sources[@]}"
           done <<< "$IMAGE_TAGS"
+
+  update-readme:
+    needs: [resolve-base, publish]
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BORGMATIC_IMAGE_VERSION: ${{ needs.resolve-base.outputs.version }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+      - name: Update README Badge
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ]; then
+            echo "Branch advanced since testing; leaving the badge for a newer run."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("README.md")
+          version = os.environ["BORGMATIC_IMAGE_VERSION"]
+          updated, count = re.subn(
+              r"Borgmatic%20Image-v[A-Za-z0-9_.-]+-green",
+              f"Borgmatic%20Image-v{version}-green",
+              path.read_text(),
+          )
+          if count != 1:
+              raise SystemExit(f"Expected one Borgmatic version badge, found {count}")
+          path.write_text(updated)
+          PY
+          git diff --quiet -- README.md && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update badge with Borgmatic Image version $BORGMATIC_IMAGE_VERSION"
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
