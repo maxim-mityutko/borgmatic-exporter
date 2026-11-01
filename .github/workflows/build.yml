@@ -184,6 +184,7 @@ jobs:
             --integration-image=borgmatic-exporter:integration-${{ matrix.arch }} \
             --junitxml=.integration-artifacts/results.xml tests/integration
       - name: Upload integration diagnostics
+        id: diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -192,6 +193,12 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 14
+      - name: Summarize integration diagnostics
+        if: always() && steps.diagnostics.outputs.artifact-url != ''
+        env:
+          ARTIFACT_URL: ${{ steps.diagnostics.outputs.artifact-url }}
+        run: |
+          printf '[Download integration diagnostics](%s)\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"
       - name: Save tested image for publication
         if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         run: |
@@ -207,7 +214,7 @@ jobs:
           compression-level: 0
 
   publish:
-    needs: [integration]
+    needs: [resolve-base, integration]
     if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     permissions:
@@ -255,7 +262,7 @@ jobs:
           done <<< "$IMAGE_TAGS"
 
   update-readme:
-    needs: [publish]
+    needs: [resolve-base, publish]
     if: github.ref_type != 'tag'
     runs-on: ubuntu-latest
     permissions:
