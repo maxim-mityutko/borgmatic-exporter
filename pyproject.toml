@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "borgmatic-exporter"
-version = "0.6.1"
+version = "0.6.2"
 description = ""
 authors = [
     "Maxim Mityutko <m@brhd.io>",
@@ -12,7 +12,7 @@ packages = [{include = "src"}]
 borgmatic-exporter = 'src.cli:cli'
 
 [tool.poetry.dependencies]
-python = "<3.16.0,>=3.14.3"
+python = "<3.16.0,>=3.15.0"
 prometheus-client = "^0.25.0"
 click = "^8.4.0"
 pretty-errors = "^1.2.25"
