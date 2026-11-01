@@ -120,7 +120,7 @@ jobs:
           mkdir -p .integration-artifacts
           docker image inspect borgmatic-exporter:integration-${{ matrix.arch }} \
             > .integration-artifacts/image.json
-          poetry run pytest -m integration --integration-backend=docker \
+          poetry run pytest -m integration \
             --integration-image=borgmatic-exporter:integration-${{ matrix.arch }} \
             --junitxml=.integration-artifacts/results.xml tests/integration
       - name: Upload integration diagnostics

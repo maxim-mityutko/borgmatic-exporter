@@ -1,22 +1,16 @@
-"""Run identical backup scenarios locally and in the unmodified release image."""
+"""Exercise Borg, borgmatic, and the exporter in the unmodified Docker image."""
 
 # pylint: disable=too-many-instance-attributes
 import contextlib
 import json
-import os
-import signal
-import socket
 import subprocess
-import sys
 import time
 import uuid
-from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 from prometheus_client.parser import text_string_to_metric_families
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
 COMMAND_TIMEOUT = 180
 
 
@@ -30,25 +24,20 @@ def wait_until(predicate, description, timeout=60):
 
 
 class ExporterPair:
-    def __init__(self, backend, image, workspace, artifacts):
-        self.backend = backend
+    def __init__(self, image, workspace, artifacts):
         self.image = image
         self.workspace = workspace
         self.artifacts = artifacts
         self.name = f"borgmatic-integration-{uuid.uuid4().hex}"
-        self.root = "/integration" if backend == "docker" else str(workspace)
-        self.config_dir = (
-            "/etc/borgmatic.d" if backend == "docker" else f"{self.root}/configs"
-        )
+        self.root = "/integration"
+        self.config_dir = "/etc/borgmatic.d"
         self.repositories = []
         self.configs = []
         self.environment = {}
-        self.process = None
-        self.service_log = None
         self.base_url = ""
         self.artifacts.mkdir(parents=True, exist_ok=True)
 
-    def host_command(self, command, *, check=True, timeout=COMMAND_TIMEOUT, **kwargs):
+    def host_command(self, command, *, check=True, timeout=COMMAND_TIMEOUT):
         with (self.artifacts / "commands.log").open("a", encoding="utf-8") as log:
             log.write(f"$ {command!r}\n")
             try:
@@ -58,7 +47,6 @@ class ExporterPair:
                     text=True,
                     timeout=timeout,
                     check=False,
-                    **kwargs,
                 )
             except subprocess.TimeoutExpired:
                 log.write(f"Command timed out after {timeout}s\n")
@@ -72,13 +60,10 @@ class ExporterPair:
         return result
 
     def command(self, *args, **kwargs):
-        if self.backend == "docker":
-            return self.host_command(["docker", "exec", self.name, *args], **kwargs)
-        return self.host_command(list(args), env=self.environment, **kwargs)
+        return self.host_command(["docker", "exec", self.name, *args], **kwargs)
 
     def python(self, script, *args):
-        executable = "python3" if self.backend == "docker" else sys.executable
-        return self.command(executable, "-c", script, *args)
+        return self.command("python3", "-c", script, *args)
 
     def write(self, path, content):
         self.python(
@@ -135,12 +120,9 @@ class ExporterPair:
             "BORGMATIC_EXPORTER_HOST": "0.0.0.0",
             "BORGMATIC_EXPORTER_CACHE_TIMEOUT": str(cache_timeout),
         }
-        if self.backend == "native" or config_mode != "default":
+        if config_mode != "default":
             self.environment["BORGMATIC_CONFIG"] = config
-        if self.backend == "docker":
-            self.start_container()
-        else:
-            self.start_process()
+        self.start_container()
         versions = [
             self.command("borg", "--version").stdout,
             self.command("borgmatic", "--version").stdout,
@@ -190,45 +172,6 @@ class ExporterPair:
         ).stdout.strip()
         self.base_url = f"http://{address}"
 
-    def start_process(self):
-        inherited = {
-            key: value
-            for key, value in os.environ.items()
-            if not key.startswith(("BORG_", "BORGMATIC_", "XDG_"))
-        }
-        self.environment = {**inherited, **self.environment}
-        for key, directory in {
-            "BORG_CACHE_DIR": "cache",
-            "BORG_SECURITY_DIR": "security",
-            "BORG_KEYS_DIR": "keys",
-            "XDG_CONFIG_HOME": "xdg-config",
-            "XDG_CACHE_HOME": "xdg-cache",
-            "XDG_STATE_HOME": "xdg-state",
-            "XDG_RUNTIME_DIR": "runtime",
-        }.items():
-            path = self.workspace / directory
-            path.mkdir(mode=0o700, exist_ok=True)
-            self.environment[key] = str(path)
-        with socket.socket() as listener:
-            listener.bind(("127.0.0.1", 0))
-            port = listener.getsockname()[1]
-        self.environment["BORGMATIC_EXPORTER_HOST"] = "127.0.0.1"
-        self.environment["BORGMATIC_EXPORTER_PORT"] = str(port)
-        self.base_url = f"http://127.0.0.1:{port}"
-        # The fixture closes this log even when startup fails.
-        # pylint: disable-next=consider-using-with
-        self.service_log = (self.artifacts / "exporter.log").open("w", encoding="utf-8")
-        # The fixture owns the service process for the duration of each scenario.
-        # pylint: disable-next=consider-using-with
-        self.process = subprocess.Popen(
-            [sys.executable, str(PROJECT_ROOT / "cli.py"), "run"],
-            cwd=PROJECT_ROOT,
-            env=self.environment,
-            stdout=self.service_log,
-            stderr=subprocess.STDOUT,
-            start_new_session=True,
-        )
-
     def get(self, path):
         try:
             with urlopen(f"{self.base_url}{path}", timeout=30) as response:
@@ -237,8 +180,6 @@ class ExporterPair:
             return error.code, error.read().decode(), error.headers
 
     def ready(self):
-        if self.process is not None and self.process.poll() is not None:
-            raise AssertionError(f"Exporter exited: see {self.artifacts}/exporter.log")
         try:
             return self.get("/")[0] == 200
         except (URLError, TimeoutError):
@@ -287,26 +228,24 @@ class ExporterPair:
             " time.sleep(0.1)\n"
             "assert Path(sys.argv[2]).exists(), 'Lock release timed out'"
         )
-        executable = "python3" if self.backend == "docker" else sys.executable
         command = [
+            "docker",
+            "exec",
+            self.name,
             "borg",
             "with-lock",
             repository,
-            executable,
+            "python3",
             "-c",
             script,
             ready,
             release,
         ]
-        if self.backend == "docker":
-            command = ["docker", "exec", self.name, *command]
         with (self.artifacts / "lock.log").open("w", encoding="utf-8") as log:
             process = subprocess.Popen(
                 command,
-                env=self.environment if self.backend == "native" else None,
                 stdout=log,
                 stderr=subprocess.STDOUT,
-                start_new_session=True,
             )
             try:
                 wait_until(
@@ -320,39 +259,33 @@ class ExporterPair:
                 assert process.wait(timeout=30) == 0
             finally:
                 if process.poll() is None:
-                    self.write(release, "release")
-                    self.stop_process(process)
+                    try:
+                        self.write(release, "release")
+                    finally:
+                        self.stop_process(process)
 
     @staticmethod
     def stop_process(process):
         if process.poll() is None:
-            os.killpg(process.pid, signal.SIGTERM)
+            process.terminate()
             try:
                 process.wait(timeout=10)
             except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
+                process.kill()
                 process.wait(timeout=10)
 
     def close(self):
-        if self.backend == "docker":
-            try:
-                result = self.host_command(["docker", "logs", self.name], check=False)
-                (self.artifacts / "container.log").write_text(
-                    result.stdout + result.stderr, encoding="utf-8"
-                )
-                result = self.host_command(
-                    ["docker", "inspect", self.name], check=False
-                )
-                (self.artifacts / "container.json").write_text(
-                    result.stdout, encoding="utf-8"
-                )
-            finally:
-                self.host_command(
-                    ["docker", "rm", "--force", "--volumes", self.name], check=False
-                )
-                self.host_command(["docker", "volume", "rm", self.name], check=False)
-        else:
-            if self.process is not None:
-                self.stop_process(self.process)
-            if self.service_log is not None:
-                self.service_log.close()
+        try:
+            result = self.host_command(["docker", "logs", self.name], check=False)
+            (self.artifacts / "container.log").write_text(
+                result.stdout + result.stderr, encoding="utf-8"
+            )
+            result = self.host_command(["docker", "inspect", self.name], check=False)
+            (self.artifacts / "container.json").write_text(
+                result.stdout, encoding="utf-8"
+            )
+        finally:
+            self.host_command(
+                ["docker", "rm", "--force", "--volumes", self.name], check=False
+            )
+            self.host_command(["docker", "volume", "rm", self.name], check=False)
