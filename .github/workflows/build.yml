@@ -198,7 +198,7 @@ jobs:
         env:
           ARTIFACT_URL: ${{ steps.diagnostics.outputs.artifact-url }}
         run: |
-          printf '[Download integration diagnostics](%s)\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"
+          printf '## Integration diagnostics\n\nDownload: <%s>\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"
       - name: Save tested image for publication
         if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         run: |
