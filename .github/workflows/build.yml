@@ -223,7 +223,9 @@ jobs:
     env:
       IMAGE_NAME: ${{ needs.resolve-base.outputs.repository }}
     steps:
-      - uses: docker/setup-buildx-action@v3
+      - uses: regclient/actions/regctl-installer@dd58ad94f76adb73d8ac1bf75ed25f01545d5b32 # v0.2.0
+        with:
+          release: v0.11.7
       - name: Download tested images
         uses: actions/download-artifact@v4
         with:
@@ -246,7 +248,7 @@ jobs:
           annotations=()
           while IFS= read -r annotation; do
             [ -n "$annotation" ] || continue
-            annotations+=(--annotation "$annotation")
+            annotations+=(--annotation "${annotation#index:}")
           done <<< "$IMAGE_ANNOTATIONS"
           sources=()
           for arch in amd64 arm64; do
@@ -254,11 +256,17 @@ jobs:
             staging="$IMAGE_NAME:tested-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$arch"
             docker tag "borgmatic-exporter:integration-$arch" "$staging"
             docker push "$staging"
-            sources+=("$staging")
+            sources+=(--ref "$staging")
           done
           while IFS= read -r tag; do
             [ -n "$tag" ] || continue
-            docker buildx imagetools create --tag "$tag" "${annotations[@]}" "${sources[@]}"
+            # Docker-format child manifests must be wrapped in an OCI index to retain annotations.
+            regctl index create "$tag" \
+              --media-type application/vnd.oci.image.index.v1+json \
+              "${annotations[@]}" "${sources[@]}"
+            regctl manifest get "$tag" --format raw-body | jq -e '
+              .mediaType == "application/vnd.oci.image.index.v1+json" and
+              (.annotations["org.opencontainers.image.description"] | length > 0)'
           done <<< "$IMAGE_TAGS"
 
   update-readme:
