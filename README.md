@@ -140,3 +140,9 @@ be triggered if there is no backup for repository within 25 hours.
     # Run exporter
     python3 cli.py run --config /etc/borgmatic/config.yaml
     ```
+
+### Integration tests
+
+- **Local (Docker required):** `make integration-test`. Override the base image with `BORGMATIC_IMAGE_VERSION=2.2.0`.
+- **CI:** Run via PRs/tags or **Actions → Build Image → Run workflow**.
+- **Diagnostics:** `.integration-artifacts/` locally; `integration-results-*` artifacts in CI.

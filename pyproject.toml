@@ -59,6 +59,12 @@ fail_under = 70
 [tool.coverage.html]
 directory = ".html"
 
+[tool.pytest.ini_options]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: real Borg/borgmatic and exporter tests (select explicitly with -m integration)",
+]
+
 [tool.black]
 skip_numeric_underscore_normalization = true
 exclude = ".*(venv|virtualenv|migrations|node_modules|s3)"
