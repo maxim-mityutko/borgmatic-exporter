@@ -116,12 +116,12 @@ jobs:
             org.opencontainers.image.base.name=borgmatic:${{ steps.borgmatic-version.outputs.version }}
             org.opencontainers.image.base.digest=${{ steps.base.outputs.digest }}
             org.opencontainers.image.title=Borgmatic Exporter
-            org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
+            org.opencontainers.image.description=Borgmatic backup automation with Prometheus metrics for repository size, deduplication, archive counts and latest backup details. Supports multiple repositories and configurable metrics caching. Based on the official Borgmatic image version ${{ steps.borgmatic-version.outputs.version }}.
           annotations: |
             org.opencontainers.image.base.name=borgmatic:${{ steps.borgmatic-version.outputs.version }}
             org.opencontainers.image.base.digest=${{ steps.base.outputs.digest }}
             org.opencontainers.image.title=Borgmatic Exporter
-            org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
+            org.opencontainers.image.description=Borgmatic backup automation with Prometheus metrics for repository size, deduplication, archive counts and latest backup details. Supports multiple repositories and configurable metrics caching. Based on the official Borgmatic image version ${{ steps.borgmatic-version.outputs.version }}.
       - name: Inspect Tags
         env:
           IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
