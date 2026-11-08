@@ -1164,7 +1164,7 @@
                   }
                 ]
               },
-          "unit": "dtdurationms"
+          "unit": "dtdhms"
             },
             "overrides": []
           },
@@ -1201,7 +1201,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-            "expr": "(time() - max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))) * 1000",
+            "expr": "time() - max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
