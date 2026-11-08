@@ -440,9 +440,9 @@
           "expr": "max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\"}[$STALE_AFTER])) * 1000",
           "format": "table",
           "hide": false,
-          "instant": false,
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "LAST_BACKUP_TIMESTAMP"
         },
         {
@@ -457,9 +457,9 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "DURATION",
           "useBackend": false
         },
@@ -475,9 +475,9 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "REPO_RAW_SIZE",
           "useBackend": false
         },
@@ -493,9 +493,9 @@
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
-          "instant": false,
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "REPO_ACTUAL_SIZE",
           "useBackend": false
         },
@@ -505,13 +505,13 @@
             "uid": "${DS_VICTORIAMETRICS}"
           },
           "editorMode": "code",
-          "expr": "time() * 1000",
+          "expr": "(time() - max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\"}[$STALE_AFTER]))) * 1000",
           "format": "table",
           "hide": false,
-          "instant": false,
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
-          "refId": "NOW"
+          "range": false,
+          "refId": "SINCE_LAST_BACKUP"
         }
       ],
       "title": "Summary",
@@ -576,12 +576,6 @@
                 ],
                 "operation": "aggregate"
               },
-              "Value #NOW": {
-                "aggregations": [
-                  "lastNotNull"
-                ],
-                "operation": "aggregate"
-              },
               "Value #RAW_SIZE": {
                 "aggregations": [
                   "lastNotNull"
@@ -608,7 +602,7 @@
               },
               "Value #SINCE_LAST_BACKUP": {
                 "aggregations": [
-                  "max"
+                  "lastNotNull"
                 ],
                 "operation": "aggregate"
               },
@@ -618,10 +612,6 @@
                 ],
                 "operation": "aggregate"
               },
-              "now() * 1000": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
               "repository": {
                 "aggregations": [],
                 "operation": "groupby"
@@ -630,44 +620,16 @@
           }
         },
         {
-          "id": "calculateField",
-          "options": {
-            "binary": {
-              "left": {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value #NOW (lastNotNull)"
-                }
-              },
-              "operator": "-",
-              "right": {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value #LAST_BACKUP_TIMESTAMP (max)"
-                }
-              }
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
-            }
-          }
-        },
-        {
           "id": "organize",
           "options": {
-            "excludeByName": {
-              "Value #NOW": true,
-              "Value #NOW (lastNotNull)": true
-            },
+            "excludeByName": {},
             "includeByName": {},
             "indexByName": {
               "Value #DURATION (lastNotNull)": 3,
               "Value #LAST_BACKUP_TIMESTAMP (max)": 5,
-              "Value #NOW (lastNotNull)": 6,
-              "Value #NOW (lastNotNull) - Value #LAST_BACKUP_TIMESTAMP (max)": 4,
               "Value #REPO_ACTUAL_SIZE (lastNotNull)": 2,
               "Value #REPO_RAW_SIZE (lastNotNull)": 1,
+              "Value #SINCE_LAST_BACKUP (lastNotNull)": 4,
               "repository": 0
             },
             "renameByName": {
@@ -678,15 +640,11 @@
               "Value #DURATION (lastNotNull)": "Duration",
               "Value #LAST_BACKUP_TIMESTAMP (lastNotNull)": "Backup Timestamp",
               "Value #LAST_BACKUP_TIMESTAMP (max)": "Backup Timestamp",
-              "Value #NOW": "",
-              "Value #NOW (lastNotNull) - Value #LAST_BACKUP_TIMESTAMP (max)": "Since Last Backup",
-              "Value #NOW - Value #LAST_BACKUP_TIMESTAMP (max)": "Since Last Backup",
               "Value #RAW_SIZE (lastNotNull)": "Raw Size",
               "Value #REPO_ACTUAL_SIZE (lastNotNull)": "Repo Actual Size",
               "Value #REPO_RAW_SIZE (lastNotNull)": "Repo Raw Size",
               "Value #SINCE_BACKUP (lastNotNull)": "Since Last Backup",
               "Value #SINCE_LAST_BACKUP (lastNotNull)": "Since Last Backup",
-              "Value #SINCE_LAST_BACKUP (max)": "Since Last Backup",
               "Value #TIMESTAMP (lastNotNull)": "Timestamp",
               "repository": "Repository"
             }
@@ -1206,7 +1164,7 @@
                   }
                 ]
               },
-              "unit": "s"
+          "unit": "dtdhms"
             },
             "overrides": []
           },
@@ -1243,7 +1201,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "time() - max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
+            "expr": "time() - max by(repository) (last_over_time(borg_last_backup_timestamp{instance=~\"$INSTANCE\", repository=~\"${REPOSITORY:raw}\"}[$STALE_AFTER]))",
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
@@ -1638,9 +1596,9 @@
               "format": "time_series",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "instant": false,
+              "instant": true,
               "legendFormat": "{{repository}}",
-              "range": true,
+              "range": false,
               "refId": "A",
               "useBackend": false
             }
