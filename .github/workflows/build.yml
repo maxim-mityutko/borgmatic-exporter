@@ -2,45 +2,39 @@ name: Build Image
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
-      - 'latest'
+    tags: ['v*.*.*', 'latest']
   pull_request:
-    branches:
-      - 'master'
-      - 'main'
-    paths-ignore:
-      - 'README.md'
+    branches: ['master', 'main']
+    paths-ignore: ['README.md']
+  schedule:
+    - cron: '23 5 * * 1'
   workflow_dispatch:
     inputs:
       borgmatic-image-version:
-        description: 'Borgmatic base image version:'
+        description: 'Borgmatic base image version to build and test'
         required: true
         default: 'latest'
 
+permissions:
+  contents: read
+
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   BORGMATIC_IMAGE_VERSION: ${{ github.event.inputs.borgmatic-image-version || 'latest' }}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@master
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
-          python-version: 3.14.3
-
+          python-version: '3.15.0'
       - name: Check Coverage
         run: |
           pip install poetry
-          poetry config virtualenvs.create false
           poetry install --no-root --with dev
-          pytest --cov
+          poetry run pytest --cov
 
   lint:
     runs-on: ubuntu-latest
@@ -49,12 +43,9 @@ jobs:
       packages: read
       statuses: write
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-
-      # https://github.com/marketplace/actions/super-linter
       - name: Super-Linter
         uses: super-linter/super-linter@v5.7.2
         env:
@@ -63,84 +54,263 @@ jobs:
           VALIDATE_PYTHON_BLACK: true
           VALIDATE_PYTHON_PYLINT: true
 
-  build:
-    needs:
-      - lint
-      - test
+  resolve-base:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      packages: write
+      contents: read
+      packages: read
+    outputs:
+      image: ${{ steps.base.outputs.image }}
+      repository: ${{ steps.base.outputs.repository }}
+      version: ${{ steps.borgmatic-version.outputs.version }}
+      tags: ${{ steps.meta.outputs.tags }}
+      labels: ${{ steps.meta.outputs.labels }}
+      annotations: ${{ steps.meta.outputs.annotations }}
     steps:
-      # https://github.com/marketplace/actions/docker-setup-qemu
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3.0.0
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Get Borgmatic Image Version
+        id: borgmatic-version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$BORGMATIC_IMAGE_VERSION"
+          if [ "$version" = latest ]; then
+            version=$(gh api --paginate --slurp \
+              '/orgs/borgmatic-collective/packages/container/borgmatic/versions?per_page=100' |
+              jq -er '[.[][] | .metadata.container.tags[]? |
+                select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] |
+                unique | sort_by(split(".") | map(tonumber)) |
+                last // error("No numeric Borgmatic image version found")')
+          fi
+          [[ "$version" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,127}$ ]]
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "BORGMATIC_IMAGE_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Resolve immutable Borgmatic base
+        id: base
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="ghcr.io/borgmatic-collective/borgmatic"
+          digest=$(docker buildx imagetools inspect "$base:$BORGMATIC_IMAGE_VERSION" |
+            awk '$1 == "Digest:" && !seen++ { print $2 }')
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "image=$base@$digest" >> "$GITHUB_OUTPUT"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "repository=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+          echo "Borgmatic base: $base:$BORGMATIC_IMAGE_VERSION ($digest)" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Setup Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3.0.0
+      - name: Meta
+        id: meta
+        uses: docker/metadata-action@v6
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index
+        with:
+          images: ${{ steps.base.outputs.repository }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=dev,enable=${{ github.ref_type != 'tag' }}
+          labels: |
+            org.opencontainers.image.base.name=borgmatic:${{ steps.borgmatic-version.outputs.version }}
+            org.opencontainers.image.base.digest=${{ steps.base.outputs.digest }}
+            org.opencontainers.image.title=Borgmatic Exporter
+            org.opencontainers.image.description=Borgmatic backup automation with Prometheus metrics for repository size, deduplication, archive counts and latest backup details. Supports multiple repositories and configurable metrics caching. Based on the official Borgmatic image version ${{ steps.borgmatic-version.outputs.version }}.
+          annotations: |
+            org.opencontainers.image.base.name=borgmatic:${{ steps.borgmatic-version.outputs.version }}
+            org.opencontainers.image.base.digest=${{ steps.base.outputs.digest }}
+            org.opencontainers.image.title=Borgmatic Exporter
+            org.opencontainers.image.description=Borgmatic backup automation with Prometheus metrics for repository size, deduplication, archive counts and latest backup details. Supports multiple repositories and configurable metrics caching. Based on the official Borgmatic image version ${{ steps.borgmatic-version.outputs.version }}.
+      - name: Inspect Tags
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: printf '%s\n' "$IMAGE_TAGS"
+      - name: Inspect Labels
+        env:
+          IMAGE_LABELS: ${{ steps.meta.outputs.labels }}
+        run: printf '%s\n' "$IMAGE_LABELS"
+      - name: Inspect Annotations
+        env:
+          IMAGE_ANNOTATIONS: ${{ steps.meta.outputs.annotations }}
+        run: printf '%s\n' "$IMAGE_ANNOTATIONS"
 
+  integration:
+    name: Build and integration (${{ matrix.arch }})
+    needs: [test, lint, resolve-base]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.15.0'
+      - uses: docker/setup-buildx-action@v4
+      - name: Install host test tools
+        run: |
+          pip install poetry
+          poetry install --no-root --with dev
+      - name: Build candidate image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          provenance: false
+          platforms: linux/${{ matrix.arch }}
+          tags: borgmatic-exporter:integration-${{ matrix.arch }}
+          labels: ${{ needs.resolve-base.outputs.labels }}
+          build-args: |
+            BORGMATIC_IMAGE_VERSION=${{ needs.resolve-base.outputs.version }}
+            BORGMATIC_IMAGE=${{ needs.resolve-base.outputs.image }}
+          cache-from: type=gha,scope=integration-${{ matrix.arch }}
+          cache-to: type=gha,scope=integration-${{ matrix.arch }},mode=max
+      - name: Test Borgmatic and exporter together
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/${{ matrix.arch }}
+        run: |
+          mkdir -p .integration-artifacts
+          docker image inspect borgmatic-exporter:integration-${{ matrix.arch }} \
+            > .integration-artifacts/image.json
+          poetry run pytest -m integration \
+            --integration-image=borgmatic-exporter:integration-${{ matrix.arch }} \
+            --junitxml=.integration-artifacts/results.xml tests/integration
+      - name: Upload integration diagnostics
+        id: diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-results-${{ matrix.arch }}
+          path: .integration-artifacts/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Summarize integration diagnostics
+        if: always() && steps.diagnostics.outputs.artifact-url != ''
+        env:
+          ARTIFACT_URL: ${{ steps.diagnostics.outputs.artifact-url }}
+        run: |
+          printf '## Integration diagnostics\n\nDownload: <%s>\n' "$ARTIFACT_URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Save tested image for publication
+        if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          docker save borgmatic-exporter:integration-${{ matrix.arch }} \
+            --output "${{ runner.temp }}/tested-${{ matrix.arch }}.tar"
+      - name: Upload tested image
+        if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: actions/upload-artifact@v7
+        with:
+          name: tested-image-${{ matrix.arch }}
+          path: ${{ runner.temp }}/tested-${{ matrix.arch }}.tar
+          retention-days: 1
+          compression-level: 0
+
+  publish:
+    needs: [resolve-base, integration]
+    if: github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE_NAME: ${{ needs.resolve-base.outputs.repository }}
+    steps:
+      - uses: regclient/actions/regctl-installer@dd58ad94f76adb73d8ac1bf75ed25f01545d5b32 # v0.2.0
+        with:
+          release: v0.11.7
+      - name: Download tested images
+        uses: actions/download-artifact@v8
+        with:
+          pattern: tested-image-*
+          path: tested-images
+          merge-multiple: true
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get Borgmatic Image Version
-        if: ${{ env.BORGMATIC_IMAGE_VERSION == 'latest' }}
-        id: borgmatic-version
-        run: |
-          LATEST_VERSION=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -s https://api.github.com/orgs/borgmatic-collective/packages/container/borgmatic/versions | jq -r '[.[] | .metadata.container.tags[]? | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | unique | sort_by(split(".") | map(tonumber)) | last' )
-          echo "BORGMATIC_IMAGE_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
-
-      # https://github.com/marketplace/actions/docker-metadata-action
-      - name: Meta
-        id: meta
-        uses: docker/metadata-action@v5.5.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=tag
-            type=raw,event=pr,value=dev
-          annotations: |
-            org.opencontainers.image.base.name=borgmatic:${{ env.BORGMATIC_IMAGE_VERSION }}
-            org.opencontainers.image.title=Borgmatic Exporter
-            org.opencontainers.image.description=Official Borgmatic image bundled with the Prometheus exporter
-
-      - name: Inspect Tags
-        run: echo "${{ steps.meta.outputs.tags }}"
-
-      - name: Inspect Labels
-        run: echo "${{ steps.meta.outputs.labels }}"
-
-      - name: Inspect Annotations
-        run: echo "${{ steps.meta.outputs.annotations }}"
-
-      # https://github.com/marketplace/actions/build-and-push-docker-images
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v5.1.0
-        with:
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          push: true
-          platforms: linux/amd64, linux/arm64
-          annotations: ${{ steps.meta.outputs.annotations }}
-          build-args: BORGMATIC_IMAGE_VERSION=${{ env.BORGMATIC_IMAGE_VERSION }}
-
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Update README Badge
-        if: ${{ success() && github.ref_type != 'tag' }}
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          git checkout $GITHUB_HEAD_REF
-          sed -i "s/Borgmatic%20Image-v[0-9.]*-green/Borgmatic%20Image-v${{ env.BORGMATIC_IMAGE_VERSION }}-green/" README.md
-          git add README.md
-          git diff --cached --quiet || git commit -m "Update badge with Borgmatic Image version ${{ env.BORGMATIC_IMAGE_VERSION }}"
-          git push origin $GITHUB_HEAD_REF
+      - name: Publish the tested images without rebuilding
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAGS: ${{ needs.resolve-base.outputs.tags }}
+          IMAGE_ANNOTATIONS: ${{ needs.resolve-base.outputs.annotations }}
+        run: |
+          set -euo pipefail
+          annotations=()
+          while IFS= read -r annotation; do
+            [ -n "$annotation" ] || continue
+            annotations+=(--annotation "${annotation#index:}")
+          done <<< "$IMAGE_ANNOTATIONS"
+          sources=()
+          for arch in amd64 arm64; do
+            docker load --input "tested-images/tested-$arch.tar"
+            staging="$IMAGE_NAME:tested-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$arch"
+            docker tag "borgmatic-exporter:integration-$arch" "$staging"
+            docker push "$staging"
+            sources+=(--ref "$staging")
+          done
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            # Docker-format child manifests must be wrapped in an OCI index to retain annotations.
+            regctl index create "$tag" \
+              --media-type application/vnd.oci.image.index.v1+json \
+              "${annotations[@]}" "${sources[@]}"
+            regctl manifest get "$tag" --format raw-body | jq -e '
+              .mediaType == "application/vnd.oci.image.index.v1+json" and
+              (.annotations["org.opencontainers.image.description"] | length > 0)'
+          done <<< "$IMAGE_TAGS"
+
+  update-readme:
+    needs: [resolve-base, publish]
+    if: github.ref_type != 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BORGMATIC_IMAGE_VERSION: ${{ needs.resolve-base.outputs.version }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+      - name: Update README Badge
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ]; then
+            echo "Branch advanced since testing; leaving the badge for a newer run."
+            exit 0
+          fi
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("README.md")
+          version = os.environ["BORGMATIC_IMAGE_VERSION"]
+          updated, count = re.subn(
+              r"Borgmatic%20Image-v[A-Za-z0-9_.-]+-green",
+              f"Borgmatic%20Image-v{version}-green",
+              path.read_text(),
+          )
+          if count != 1:
+              raise SystemExit(f"Expected one Borgmatic version badge, found {count}")
+          path.write_text(updated)
+          PY
+          git diff --quiet -- README.md && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "Update badge with Borgmatic Image version $BORGMATIC_IMAGE_VERSION"
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"

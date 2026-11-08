@@ -2,7 +2,7 @@
 
 ![Super-Linter](https://github.com/maxim-mityutko/borgmatic-exporter/actions/workflows/build.yml/badge.svg)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/maxim-mityutko/borgmatic-exporter/master)
-![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v2.1.7-green)
+![Static Badge](https://img.shields.io/badge/Borgmatic%20Image-v2.2.0-green)
 
 **Borgmatic Exporter** seamlessly integrates Prometheus metrics and Borgmatic. This project is based on
 the [borg-exporter](https://github.com/danihodovic/borg-exporter) by [@danihodovic](https://github.com/danihodovic),
@@ -146,3 +146,9 @@ be triggered if there is no backup for repository within 25 hours.
     # Run exporter
     python3 cli.py run --config /etc/borgmatic/config.yaml
     ```
+
+### Integration tests
+
+- **Local (Docker required):** `make integration-test`. Override the base image with `BORGMATIC_IMAGE_VERSION=2.2.0`.
+- **CI:** Run via PRs/tags or **Actions → Build Image → Run workflow**.
+- **Diagnostics:** `.integration-artifacts/` locally; `integration-results-*` artifacts in CI.

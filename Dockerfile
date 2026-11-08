@@ -1,10 +1,13 @@
 ARG BORGMATIC_IMAGE_VERSION="latest"
-FROM ghcr.io/borgmatic-collective/borgmatic:${BORGMATIC_IMAGE_VERSION}
+ARG BORGMATIC_IMAGE="ghcr.io/borgmatic-collective/borgmatic:${BORGMATIC_IMAGE_VERSION}"
+FROM ${BORGMATIC_IMAGE}
+ARG BORGMATIC_IMAGE
+ARG BORGMATIC_IMAGE_VERSION
 
 LABEL org.opencontainers.image.source="https://github.com/maxim-mityutko/borgmatic-exporter"
-LABEL org.opencontainers.image.base.name="borgmatic:${BORGMATIC_IMAGE_VERSION}"
+LABEL org.opencontainers.image.base.name="${BORGMATIC_IMAGE}"
 LABEL org.opencontainers.image.title="Borgmatic Exporter"
-LABEL org.opencontainers.image.description="Official Borgmatic image bundled with the Prometheus exporter"
+LABEL org.opencontainers.image.description="Borgmatic backup automation with Prometheus metrics for repository size, deduplication, archive counts and latest backup details. Supports multiple repositories and configurable metrics caching. Based on the official Borgmatic image version ${BORGMATIC_IMAGE_VERSION}."
 
 
 COPY ./src exporter/src
