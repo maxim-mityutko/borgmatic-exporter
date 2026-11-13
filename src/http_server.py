@@ -39,7 +39,16 @@ def metrics():
     return output, 200, {"Content-Type": content_type}
 
 
-def start_http_server(borgmatic_configs, registry, host, port, cache_timeout):
+def start_http_server(
+    borgmatic_configs,
+    registry,
+    host,
+    port,
+    unix_socket,
+    unix_socket_mode,
+    systemd_sockets,
+    cache_timeout,
+):
     if isinstance(borgmatic_configs, str):
         borgmatic_configs = (borgmatic_configs,)
     app = Flask(__name__)
@@ -59,5 +68,24 @@ def start_http_server(borgmatic_configs, registry, host, port, cache_timeout):
             },
         )
 
-    logger.info("Started borgmatic-exporter at port='{}'", port)
-    serve(app, host=host, port=port, _quiet=True)
+    if systemd_sockets:
+        logger.info(
+            "Started borgmatic-exporter via systemd socket activation at='{}'",
+            systemd_sockets,
+        )
+        serve(
+            app,
+            sockets=systemd_sockets,
+            _quiet=True,
+        )
+    elif unix_socket is not None:
+        logger.info("Started borgmatic-exporter at unix_socket='{}'", unix_socket)
+        serve(
+            app,
+            unix_socket=unix_socket,
+            unix_socket_perms=unix_socket_mode,
+            _quiet=True,
+        )
+    else:
+        logger.info("Started borgmatic-exporter at host='{}' - port='{}'", host, port)
+        serve(app, host=host, port=port, _quiet=True)

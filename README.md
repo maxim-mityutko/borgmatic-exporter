@@ -11,6 +11,7 @@ however it introduces a few changes:
 - extra metrics
 - native integration with the official Borgmatic docker image
 - results caching
+- listening on unix sockets and systemd socket activation
 
 ## Metrics
 
@@ -48,13 +49,15 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
 
     **Borgmatic Exporter** supports the following environment variables for customization:
 
-    | Name                             | Description                                                                | Default                     |
-    |----------------------------------|----------------------------------------------------------------------------|-----------------------------|
-    | BORGMATIC_CONFIG                 | One or multiple references to Borgmatic configuration files                | /etc/borgmatic.d/config.yml |
-    | BORGMATIC_EXPORTER_HOST          | Host for the metrics server                                                | 0.0.0.0                     |
-    | BORGMATIC_EXPORTER_PORT          | Port for the metrics server                                                | 9996                        |
-    | BORGMATIC_EXPORTER_TIME          | Display time each Borgmatic call takes                                     | false                       |
-    | BORGMATIC_EXPORTER_CACHE_TIMEOUT | Cache the response of the metrics endpoint for the given number of seconds | 600                         |
+    | Name                                | Description                                                                                             | Default                       |
+    |-------------------------------------|---------------------------------------------------------------------------------------------------------|-------------------------------|
+    | BORGMATIC_CONFIG                    | One or multiple references to Borgmatic configuration files                                             | /etc/borgmatic.d/config.yml   |
+    | BORGMATIC_EXPORTER_HOST             | Host for the metrics server                                                                             | 0.0.0.0                       |
+    | BORGMATIC_EXPORTER_PORT             | Port for the metrics server                                                                             | 9996                          |
+    | BORGMATIC_EXPORTER_UNIX_SOCKET      | Path of the UNIX socket to listen on instead of a TCP socket. Cannot be combined with --host or --port. | None                          |
+    | BORGMATIC_EXPORTER_UNIX_SOCKET_MODE | The unix permission for the UNIX socket.                                                                | None                          |
+    | BORGMATIC_EXPORTER_TIME             | Display time each Borgmatic call takes                                                                  | false                         |
+    | BORGMATIC_EXPORTER_CACHE_TIMEOUT    | Cache the response of the metrics endpoint for the given number of seconds                              | 600                           |
 
 #### Notes
 
@@ -63,6 +66,7 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
 - If **keyfiles** need to be provided to Borgmatic Exporter, mount the volume containing the keys to both `/root/.config/borg`
     and `/tmp/borgmatic-exporter-cache/.config/borg` (ref: [#43](https://github.com/maxim-mityutko/borgmatic-exporter/issues/43))
 - Set `BORGMATIC_EXPORTER_CACHE_TIMEOUT` environment variable to 0 to disable metrics caching
+- If a socket is passed from systemd for socket activation, it is then used
 
 ### Local
 
