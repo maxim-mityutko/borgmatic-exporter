@@ -5,6 +5,7 @@ import subprocess
 from functools import partial
 from io import StringIO
 from typing import Any
+from pathlib import Path
 
 import arrow
 import timy
@@ -106,10 +107,10 @@ def set_metric(
     c.labels(**labels).set(value)
 
 
-def collect(borgmatic_configs: list, registry):
+def collect(borgmatic_configs: list, registry, borg_home: Path):
     # temporary workaround for https://github.com/borgbackup/borg/issues/7255 to be used together with `--bypass-lock`
     tmp_env = os.environ.copy()
-    tmp_env["HOME"] = "/tmp/borgmatic-exporter-cache"
+    tmp_env["HOME"] = str(borg_home)
     tmp_env["BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK"] = "yes"
 
     borgmatic_configs = " -c ".join(borgmatic_configs)

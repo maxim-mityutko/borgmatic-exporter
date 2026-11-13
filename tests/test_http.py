@@ -2,6 +2,7 @@ import json
 import os
 import time
 from threading import Thread
+from pathlib import Path
 
 import pytest
 import requests
@@ -26,9 +27,10 @@ def server():
     host = "0.0.0.0"
     port = 9996
     cache_timeout = 300
+    borg_home = Path("/tmp/borgmatic-exporter-cache")
     Thread(
         target=start_http_server,
-        args=("/conf/foo.yml", registry, host, port, cache_timeout),
+        args=("/conf/foo.yml", registry, host, port, cache_timeout, borg_home),
         daemon=True,
     ).start()
 
