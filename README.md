@@ -48,13 +48,14 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
 
     **Borgmatic Exporter** supports the following environment variables for customization:
 
-    | Name                             | Description                                                                | Default                     |
-    |----------------------------------|----------------------------------------------------------------------------|-----------------------------|
-    | BORGMATIC_CONFIG                 | One or multiple references to Borgmatic configuration files                | /etc/borgmatic.d/config.yml |
-    | BORGMATIC_EXPORTER_HOST          | Host for the metrics server                                                | 0.0.0.0                     |
-    | BORGMATIC_EXPORTER_PORT          | Port for the metrics server                                                | 9996                        |
-    | BORGMATIC_EXPORTER_TIME          | Display time each Borgmatic call takes                                     | false                       |
-    | BORGMATIC_EXPORTER_CACHE_TIMEOUT | Cache the response of the metrics endpoint for the given number of seconds | 600                         |
+    | Name                             | Description                                                                | Default                       |
+    |----------------------------------|----------------------------------------------------------------------------|-------------------------------|
+    | BORGMATIC_CONFIG                 | One or multiple references to Borgmatic configuration files                | /etc/borgmatic.d/config.yml   |
+    | BORGMATIC_EXPORTER_HOST          | Host for the metrics server                                                | 0.0.0.0                       |
+    | BORGMATIC_EXPORTER_PORT          | Port for the metrics server                                                | 9996                          |
+    | BORGMATIC_EXPORTER_TIME          | Display time each Borgmatic call takes                                     | false                         |
+    | BORGMATIC_EXPORTER_CACHE_TIMEOUT | Cache the response of the metrics endpoint for the given number of seconds | 600                           |
+    | BORGMATIC_EXPORTER_BORG_HOME     | The directory borg will use as its home                                    | /tmp/borgmatic-exporter-cache |
 
 #### Notes
 
@@ -63,6 +64,8 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
 - If **keyfiles** need to be provided to Borgmatic Exporter, mount the volume containing the keys to both `/root/.config/borg`
     and `/tmp/borgmatic-exporter-cache/.config/borg` (ref: [#43](https://github.com/maxim-mityutko/borgmatic-exporter/issues/43))
 - Set `BORGMATIC_EXPORTER_CACHE_TIMEOUT` environment variable to 0 to disable metrics caching
+- The home for borgs operations can be adjusted with the `BORGMATIC_EXPORTER_BORG_HOME` variable.
+    This mechanism can be useful if a tmpfs for `/tmp` is used and ram is constrained a setup while disk space is not.
 
 ### Local
 

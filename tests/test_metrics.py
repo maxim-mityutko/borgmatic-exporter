@@ -4,6 +4,7 @@ import os
 import arrow
 import pytest
 from prometheus_client import CollectorRegistry
+from pathlib import Path
 
 from src import metrics
 
@@ -30,6 +31,7 @@ class TestMetrics:
         metrics.collect(
             borgmatic_configs=["/conf/foo.yaml", "/conf/bar.yaml", "/conf/baz.yaml"],
             registry=registry,
+            borg_home=Path("/tmp/borgmatic-exporter-cache"),
         )
         yield registry
 

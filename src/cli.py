@@ -2,6 +2,7 @@ import subprocess
 
 import click
 from loguru import logger
+from pathlib import Path
 from prometheus_client import CollectorRegistry
 from timy.settings import timy_config
 
@@ -66,15 +67,24 @@ def cli():
     help="Cache the response of the metrics endpoint for the given number of seconds, set to 0 to disable caching",
     envvar="BORGMATIC_EXPORTER_CACHE_TIMEOUT",
 )
-def run(config, host, port, time_borgmatic, cache_timeout):
+@click.option(
+    "--borg-home",
+    type=click.Path(file_okay=False, writable=True, resolve_path=True, path_type=Path),
+    default=Path("/tmp/borgmatic-exporter-cache"),
+    show_default=True,
+    help="The directory borg will use as its home.",
+    envvar="BORGMATIC_EXPORTER_BORG_HOME",
+)
+def run(config, host, port, time_borgmatic, cache_timeout, borg_home):
     logger.info("Exporter execution parameters set...")
     logger.info(f"Borgmatic config path: {config}")
     logger.info(f"Host:'{host}'")
     logger.info(f"Port:'{port}'")
     logger.info(f"Cache timeout (seconds):'{cache_timeout}'")
+    logger.info(f"Borg home:'{borg_home}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
-    start_http_server(config, registry, host, port, cache_timeout)
+    start_http_server(config, registry, host, port, cache_timeout, borg_home)
 
 
 def run_abort(cmd):

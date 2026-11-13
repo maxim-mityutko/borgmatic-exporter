@@ -1,3 +1,4 @@
+from pathlib import Path
 from flask import Blueprint, Flask, current_app, request
 from flask_caching import Cache
 from loguru import logger
@@ -33,18 +34,22 @@ def index():
 def metrics():
     borgmatic_config = current_app.config["borgmatic_config"]
     registry = current_app.config["registry"]
-    collect(borgmatic_config, registry)
+    borg_home = current_app.config["borg_home"]
+    collect(borgmatic_config, registry, borg_home)
     encoder, content_type = choose_encoder(request.headers.get("accept"))
     output = encoder(current_app.config["registry"])
     return output, 200, {"Content-Type": content_type}
 
 
-def start_http_server(borgmatic_configs, registry, host, port, cache_timeout):
+def start_http_server(
+    borgmatic_configs, registry, host, port, cache_timeout, borg_home: Path
+):
     if isinstance(borgmatic_configs, str):
         borgmatic_configs = (borgmatic_configs,)
     app = Flask(__name__)
     app.config["registry"] = create_metrics(registry)
     app.config["borgmatic_config"] = borgmatic_configs
+    app.config["borg_home"] = borg_home
     app.register_blueprint(blueprint)
 
     if cache_timeout == 0:
