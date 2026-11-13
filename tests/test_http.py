@@ -27,6 +27,7 @@ def server():
     port = 9996
     unix_socket = None
     unix_socket_mode = None
+    systemd_sockets = []
     cache_timeout = 300
     Thread(
         target=start_http_server,
@@ -37,6 +38,7 @@ def server():
             port,
             unix_socket,
             unix_socket_mode,
+            systemd_sockets,
             cache_timeout,
         ),
         daemon=True,

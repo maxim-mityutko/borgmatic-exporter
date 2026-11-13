@@ -986,6 +986,17 @@ files = [
 ]
 
 [[package]]
+name = "systemd-python"
+version = "235"
+description = "Python interface for libsystemd"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "systemd-python-235.tar.gz", hash = "sha256:4e57f39797fd5d9e2d22b8806a252d7c0106c936039d1e71c8c6b8008e695c0a"},
+]
+
+[[package]]
 name = "timy"
 version = "0.4.2"
 description = "Minimalist measurement of python code time"
@@ -1092,4 +1103,4 @@ dev = ["black (>=19.3b0) ; python_version >= \"3.6\"", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "<3.16.0,>=3.15.0"
-content-hash = "e14db4f09b2f82142ee05174e16b1003c865b996a1e28afab054c325523c914c"
+content-hash = "61a32c0e6c84ec9eafd22171576bbea0367da9c129185624734e55bfd9900897"

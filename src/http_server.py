@@ -46,6 +46,7 @@ def start_http_server(
     port,
     unix_socket,
     unix_socket_mode,
+    systemd_sockets,
     cache_timeout,
 ):
     if isinstance(borgmatic_configs, str):
@@ -67,7 +68,17 @@ def start_http_server(
             },
         )
 
-    if unix_socket is not None:
+    if systemd_sockets:
+        logger.info(
+            "Started borgmatic-exporter via systemd socket activation at='{}'",
+            systemd_sockets,
+        )
+        serve(
+            app,
+            sockets=systemd_sockets,
+            _quiet=True,
+        )
+    elif unix_socket is not None:
         logger.info("Started borgmatic-exporter at unix_socket='{}'", unix_socket)
         serve(
             app,

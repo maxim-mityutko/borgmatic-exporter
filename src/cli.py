@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
+from socket import socket
 
+from systemd.daemon import listen_fds
 import click
 from click.core import ParameterSource
 from loguru import logger
@@ -113,12 +115,19 @@ def run(
             "The mode how the unix socket should be created is set, but no unix socket configuration was supplied."
         )
 
+    systemd_sockets = listen_fds(unset_environment=True)
+    if systemd_sockets:
+        # systemd gives us file descriptors while waitress expects a socket
+        systemd_sockets = [socket(fileno=fd) for fd in systemd_sockets]
+        logger.info("A systemd socket was passed to the unix, we will utilize it.")
+
     logger.info("Exporter execution parameters set...")
     logger.info(f"Borgmatic config path: {config}")
     logger.info(f"Host:'{host}'")
     logger.info(f"Port:'{port}'")
     logger.info(f"Unix Socket:'{unix_socket}'")
     logger.info(f"Unix Socket Mode:'{unix_socket_mode}'")
+    logger.info(f"Systemd Socket:'{systemd_sockets}'")
     logger.info(f"Cache timeout (seconds):'{cache_timeout}'")
     registry = CollectorRegistry(auto_describe=True)
     timy_config.tracking = time_borgmatic
@@ -129,6 +138,7 @@ def run(
         port,
         unix_socket,
         unix_socket_mode,
+        systemd_sockets,
         cache_timeout,
     )
 
