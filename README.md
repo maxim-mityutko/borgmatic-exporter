@@ -61,11 +61,13 @@ docker pull ghcr.io/maxim-mityutko/borgmatic-exporter:latest
 
 - Use colon (`:`) if multiple configs should be provided through the environment variable `BORGMATIC_CONFIG`,
     e.g. `/etc/borgmatic/config_1.yml:/etc/borgmatic/config_2.yml`
-- If **keyfiles** need to be provided to Borgmatic Exporter, mount the volume containing the keys to both `/root/.config/borg`
-    and `/tmp/borgmatic-exporter-cache/.config/borg` (ref: [#43](https://github.com/maxim-mityutko/borgmatic-exporter/issues/43))
 - Set `BORGMATIC_EXPORTER_CACHE_TIMEOUT` environment variable to 0 to disable metrics caching
 - The home for borgs operations can be adjusted with the `BORGMATIC_EXPORTER_BORG_HOME` variable.
-    This mechanism can be useful if a tmpfs for `/tmp` is used and ram is constrained a setup while disk space is not.
+    This mechanism can be useful if tmpfs for `/tmp` is used and RAM is constrained in a setup while disk space is not
+- If **keyfiles** are required, mount the key volume at `/root/.config/borg` for the backup job
+     and at `<borg_home>/.config/borg` for the exporter. `<borg_home>` is the path inside the container set by
+     `BORGMATIC_EXPORTER_BORG_HOME`. The default exporter mount is `/tmp/borgmatic-exporter-cache/.config/borg`
+     (ref: [#43](https://github.com/maxim-mityutko/borgmatic-exporter/issues/43))
 
 ### Local
 
